@@ -1,0 +1,29 @@
+= GenAI Plugin docs
+
+This repository contains the AsciiDoc and other sources to build the link:https://neo4j.com/docs/genai-plugin[Neo4j GenAI Plugin].
+
+
+== Installation
+
+To build these docs locally you will need link:https://nodejs.org/en/download/package-manager/[Node & NPM^] installed.
+
+To install the dependencies run:
+
+[source, sh]
+----
+npm i
+----
+
+
+== Live Preview
+
+To preview the docs, run:
+
+[source, sh]
+----
+npm start
+----
+
+This will build a set of HTML files in `build/site` and then serve them through an express server at http://localhost:8000.
+The start script will also listen for changes and automatically rebuild the files automatically.
+You will still need to refresh the page to view the changes.
