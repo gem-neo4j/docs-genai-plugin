@@ -1,4 +1,4 @@
-name: genai-plugin
+name: plugin
 title: GenAI Plugin
 version: '2025.01'
 start_page: ROOT:index.adoc
