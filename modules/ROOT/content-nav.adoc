@@ -1,7 +1,8 @@
 * xref:index.adoc[]
 
-* xref:neo4j-databases.adoc[]
+* xref:embeddings.adoc[]
 
-* xref:reference.adoc[]
+* *Reference*
 
-
+* xref:reference/functions-procedures.adoc[]
+* xref:reference/ai-providers.adoc[]

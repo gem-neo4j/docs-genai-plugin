@@ -1,3 +1,5 @@
+:description: Create, store, and manipulate vector embeddings in a Neo4j database.
+:test-setup-dump: https://github.com/neo4j-graph-examples/recommendations/raw/main/data/recommendations-5.26-block.dump
 
 = Create and store embeddings in a Neo4j database
 
@@ -8,21 +10,25 @@ This page shows how these embeddings can be created and stored as properties on 
 [TIP]
 For a hands-on guide on how to use the GenAI plugin on a Neo4j database, see link:https://neo4j.com/docs/genai/tutorials/embeddings-vector-indexes/[Embeddings & Vector Indexes Tutorial -> Create embeddings with cloud AI providers].
 
+[TIP]
+To learn more about using embeddings in combination with vector indexes, see link:{neo4j-docs-base-uri}/cypher-manual/current/indexes/semantic-indexes/vector-indexes/#embeddings[Cypher -> Vector indexes -> Vectors and embeddings in Neo4j].
+
 [[example-graph]]
 == Example graph
 
 The examples on this page use the link:https://github.com/neo4j-graph-examples/recommendations[Neo4j movie recommendations] dataset, focusing on the `plot` and `title` properties of `Movie` nodes.
 
-image::genai_graph.svg[width="600",role="middle"]
+image::genai-graph.svg[Example graph connecting person and actor nodes with a movie node via acted in and directed relationships,width=600,role=popup]
 
 The graph contains 28863 nodes and 332522 relationships.
 There are 9083 `Movie` nodes with a `plot` and `title` property.
 
-To recreate the graph, download and import this link:https://github.com/neo4j-graph-examples/recommendations/blob/main/data/recommendations-embeddings-50.dump[dump file] to an empty Neo4j database (running version 5.17 or later).
-Dump files can be imported for both link:{neo4j-docs-base-uri}/aura/auradb/importing/import-database/[Aura] and link:{neo4j-docs-base-uri}/operations-manual/current/backup-restore/restore-dump/[on-prem] instances.
+To recreate the graph, download and import this link:https://github.com/neo4j-graph-examples/recommendations/raw/main/data/recommendations-5.26.dump[dump file] into an empty Neo4j database.
+Dump files can be imported for both link:{neo4j-docs-base-uri}/aura/auradb/importing/import-database/[Aura] and link:{neo4j-docs-base-uri}/operations-manual/current/backup-restore/restore-dump/[self-managed] instances.
 
 [NOTE]
-The embeddings on this are generated using link:https://platform.openai.com/docs/guides/embeddings[OpenAI] (model `text-embedding-ada-002`), producing 1536-dimensional vectors.
+The embeddings on this page are generated using the link:https://platform.openai.com/docs/guides/embeddings[OpenAI] model `text-embedding-ada-002` (1536-dimensional vectors).
+
 
 [[single-embedding]]
 == Generate a single embedding and store it
@@ -37,16 +43,16 @@ genai.vector.encode(resource :: STRING, provider :: STRING, configuration :: MAP
 
 * The `resource` (a `STRING`) is the object to transform into an embedding, such as a chunk text or a node/relationship property.
 * The `provider` (a `STRING`) is the case-insensitive identifier of the provider to use.
-See identifiers under xref:reference.adoc#ai-providers[] for supported options.
+See identifiers under xref:reference/ai-providers.adoc[] for supported options.
 * The `configuration` (a `MAP`) contains provider-specific settings, such as which model to invoke, as well as any required API credentials.
-See xref:reference.adoc#ai-providers[] for details of each supported provider.
+See xref:reference/ai-providers.adoc[] for details of each supported provider.
 Note that because this argument may contain sensitive data, it is obfuscated in the link:https://neo4j.com/docs/operations-manual/current/monitoring/logging/[query.log].
-However, if the function call is misspelled or the query is otherwise malformed, it may be logged without being obfuscated.
+However, if the function call is misspelled or the query is otherwise malformed, it will be logged without being obfuscated.
 
 [IMPORTANT]
 ====
 This function sends one API request every time it is called, which may result in a lot of overhead in terms of both network traffic and latency.
-If you want to generate many embeddings at once, use xref:neo4j-databases.adoc#multiple-embeddings[].
+If you want to generate many embeddings at once, use xref:multiple-embeddings[].
 ====
 
 Use the `db.create.setNodeVectorProperty` procedure to store an embedding to a node property.
@@ -59,7 +65,7 @@ db.create.setNodeVectorProperty(node :: NODE, key :: STRING, vector :: ANY)
 
 Use the `db.create.setRelationshipVectorProperty` procedure to store an embedding to a relationship property.
 
-.Signature for `db.create.setRelationshipVectorProperty` label:procedure[] label:new[Introduced in 5.18]
+.Signature for `db.create.setRelationshipVectorProperty` label:procedure[]
 [source,syntax]
 ----
 db.create.setRelationshipVectorProperty(relationship :: RELATIONSHIP, key :: STRING, vector :: ANY)
@@ -75,12 +81,12 @@ The embeddings are stored as properties on nodes or relationships with the type 
 ====
 
 .Create an embedding property for the Godfather
-[source,cypher,role=test-skip]
+[source,cypher,role=test-result-skip]
 ----
 MATCH (m:Movie {title:'Godfather, The'})
 WHERE m.plot IS NOT NULL AND m.title IS NOT NULL
 WITH m, m.title || ' ' || m.plot AS titleAndPlot // <1>
-WITH m, genai.vector.encode(titleAndPlot, 'OpenAI', { token: $token }) AS propertyVector // <2>
+WITH m, genai.vector.encode(titleAndPlot, 'OpenAI', { token: $openaiToken }) AS propertyVector // <2>
 CALL db.create.setNodeVectorProperty(m, 'embedding', propertyVector) // <3>
 RETURN m.embedding AS embedding
 ----
@@ -89,8 +95,8 @@ RETURN m.embedding AS embedding
 <2> Create a 1536 dimensional embedding from the `titleAndPlot`.
 <3> Store the `propertyVector` as a new `embedding` property on The Godfather node.
 
-.Result
-[source, "queryresult"]
+.Result (output capped after 4 entries)
+[source, role=queryresult]
 ----
 +----------------------------------------------------------------------------------------------------+
 | embedding                                                                                          |
@@ -99,8 +105,6 @@ RETURN m.embedding AS embedding
 +----------------------------------------------------------------------------------------------------+
 ----
 
-[NOTE]
-This result only shows the first 4 of the 1536 numbers in the embedding.
 ====
 
 [[multiple-embeddings]]
@@ -123,11 +127,11 @@ genai.vector.encodeBatch(resources :: LIST<STRING>, provider :: STRING, configur
 
 * The `resources` (a `LIST<STRING>`) parameter is the list of objects to transform into embeddings, such as chunks of text.
 * The `provider` (a `STRING`) is the case-insensitive identifier of the provider to use.
-See xref:reference.adoc#ai-providers[] for supported options.
+See xref:reference/ai-providers.adoc[] for supported options.
 * The `configuration` (a `MAP`) specifies provider-specific settings such as which model to invoke, as well as any required API credentials.
-See xref:reference.adoc#ai-providers[] for details of each supported provider.
+See xref:reference/ai-providers.adoc[] for details of each supported provider.
 Note that because this argument may contain sensitive data, it is obfuscated in the link:https://neo4j.com/docs/operations-manual/current/monitoring/logging/[query.log].
-However, if the function call is misspelled or the query is otherwise malformed, it may be logged without being obfuscated.
+However, if the function call is misspelled or the query is otherwise malformed, it will be logged without being obfuscated.
 
 Each returned row contains the following columns:
 
@@ -138,14 +142,14 @@ Each returned row contains the following columns:
 .Create embeddings from a limited number of nodes and store them
 ====
 
-[source, cypher, role=test-skip]
+[source, cypher]
 ----
 MATCH (m:Movie WHERE m.plot IS NOT NULL)
 WITH m
 LIMIT 20
 WITH collect(m) AS moviesList // <1>
 WITH moviesList, [movie IN moviesList | movie.title || ': ' || movie.plot] AS batch // <2>
-CALL genai.vector.encodeBatch(batch, 'OpenAI', { token: $token }) YIELD index, vector
+CALL genai.vector.encodeBatch(batch, 'OpenAI', { token: $openaiToken }) YIELD index, vector
 WITH moviesList, index, vector
 CALL db.create.setNodeVectorProperty(moviesList[index], 'embedding', vector) // <3>
 ----
@@ -158,7 +162,7 @@ CALL db.create.setNodeVectorProperty(moviesList[index], 'embedding', vector) // 
 [#encodebatch-large-dataset]
 .Create embeddings from a large number of nodes and store them
 ====
-[source, cypher, role=test-skip]
+[source, cypher]
 ----
 MATCH (m:Movie WHERE m.plot IS NOT NULL)
 WITH collect(m) AS moviesList, // <1>
@@ -167,9 +171,9 @@ WITH collect(m) AS moviesList, // <1>
 UNWIND range(0, total-1, batchSize) AS batchStart // <3>
 CALL (moviesList, batchStart, batchSize) { // <4>
     WITH [movie IN moviesList[batchStart .. batchStart + batchSize] | movie.title || ': ' || movie.plot] AS batch // <5>
-    CALL genai.vector.encodeBatch(batch, 'OpenAI', { token: $token }) YIELD index, vector
+    CALL genai.vector.encodeBatch(batch, 'OpenAI', { token: $openaiToken }) YIELD index, vector
     CALL db.create.setNodeVectorProperty(moviesList[batchStart + index], 'embedding', vector) // <6>
-} IN CONCURRENT TRANSACTIONS OF 1 ROW <7>
+} IN CONCURRENT TRANSACTIONS OF 1 ROW // <7>
 ----
 
 <1> link:{neo4j-docs-base-uri}/cypher-manual/current/functions/aggregating/#functions-collect/[Collect] all returned `Movie` nodes into a `LIST<NODE>`.
