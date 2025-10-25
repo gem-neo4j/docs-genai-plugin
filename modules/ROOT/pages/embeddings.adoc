@@ -1,9 +1,10 @@
 :description: Create, store, and manipulate vector embeddings in a Neo4j database.
 :test-setup-dump: https://github.com/neo4j-graph-examples/recommendations/raw/main/data/recommendations-5.26-block.dump
 
+
 = Create and store embeddings in a Neo4j database
 
-Neo4j's link:{neo4j-docs-base-uri}/cypher-manual/current/indexes/semantic-indexes/vector-indexes[vector indexes] and link:{neo4j-docs-base-uri}/cypher-manual/functions/vector[vector functions] allow you to calculate the similarity between node and relationship properties in a graph.
+Neo4j's link:{neo4j-docs-base-uri}/cypher-manual/current/indexes/semantic-indexes/vector-indexes[vector indexes] and link:{neo4j-docs-base-uri}/cypher-manual/current/functions/vector[vector functions] allow you to calculate the similarity between node and relationship properties in a graph.
 A prerequisite for using these features is that vector embeddings have been set as properties of these entities.
 This page shows how these embeddings can be created and stored as properties on nodes and relationships in a Neo4j database using the GenAI plugin.
 
@@ -13,15 +14,14 @@ For a hands-on guide on how to use the GenAI plugin on a Neo4j database, see lin
 [TIP]
 To learn more about using embeddings in combination with vector indexes, see link:{neo4j-docs-base-uri}/cypher-manual/current/indexes/semantic-indexes/vector-indexes/#embeddings[Cypher -> Vector indexes -> Vectors and embeddings in Neo4j].
 
+
 [[example-graph]]
 == Example graph
 
 The examples on this page use the link:https://github.com/neo4j-graph-examples/recommendations[Neo4j movie recommendations] dataset, focusing on the `plot` and `title` properties of `Movie` nodes.
+There are 9083 `Movie` nodes with a `plot` and `title` property.
 
 image::genai-graph.svg[Example graph connecting person and actor nodes with a movie node via acted in and directed relationships,width=600,role=popup]
-
-The graph contains 28863 nodes and 332522 relationships.
-There are 9083 `Movie` nodes with a `plot` and `title` property.
 
 To recreate the graph, download and import this link:https://github.com/neo4j-graph-examples/recommendations/raw/main/data/recommendations-5.26.dump[dump file] into an empty Neo4j database.
 Dump files can be imported for both link:{neo4j-docs-base-uri}/aura/auradb/importing/import-database/[Aura] and link:{neo4j-docs-base-uri}/operations-manual/current/backup-restore/restore-dump/[self-managed] instances.
@@ -107,11 +107,12 @@ RETURN m.embedding AS embedding
 
 ====
 
+
 [[multiple-embeddings]]
 == Generate a batch of embeddings and store them
 
 Use the `genai.vector.encodeBatch` procedure to generate many vector embeddings with a single API request.
-This procedure takes a list of resources as an input, and returns the same number of result rows, instead of a single one.
+This procedure takes a list of resources as an input, and returns the same number of result rows.
 
 [IMPORTANT]
 ====
@@ -155,7 +156,7 @@ CALL db.create.setNodeVectorProperty(moviesList[index], 'embedding', vector) // 
 ----
 
 <1> link:{neo4j-docs-base-uri}/cypher-manual/current/functions/aggregating/#functions-collect/[Collect] all  20 `Movie` nodes into a `LIST<NODE>`.
-<2> Use a link:{neo4j-docs-base-uri}/cypher-manual/current/values-and-types/lists/#cypher-list-comprehension[list comprehension] (`[]`) to extract the `title` and `plot` properties of the movies in `moviesList` into a new `LIST<STRING>`.
+<2> The link:{neo4j-docs-base-uri}/cypher-manual/current/values-and-types/lists/#cypher-list-comprehension[list comprehension] (`[]`) extracts the `title` and `plot` properties of the movies in `moviesList` into a new `LIST<STRING>`.
 <3> `db.create.setNodeVectorProperty` is run for each `vector` returned by `genai.vector.encodeBatch`, and stores that vector as a property named `embedding` on the corresponding node.
 ====
 
@@ -183,12 +184,11 @@ Too large a batch size may also exceed the provider's threshold.
 <3> Process `Movie` nodes in increments of `batchSize`.
 The end range `total-1` is due to `range` being inclusive on both ends.
 <4> A link:{neo4j-docs-base-uri}/cypher-manual/current/subqueries/subqueries-in-transactions/[`CALL` subquery] executes a separate transaction for each batch.
-Note that this `CALL` subquery uses a link:{neo4j-docs-base-uri}/cypher-manual/current/subqueries/call-subquery/#variable-scope-clause[variable scope clause] (introduced in Neo4j 5.23) to import variables.
+Note that this `CALL` subquery uses a link:{neo4j-docs-base-uri}/cypher-manual/current/subqueries/call-subquery/#variable-scope-clause[variable scope clause] to import variables.
 If you are using an older version of Neo4j, use an link:{neo4j-docs-base-uri}/cypher-manual/current/subqueries/call-subquery/#importing-with[importing `WITH` clause] instead.
 <5> `batch` is a list of strings, each being the concatenation of `title` and `plot` of one movie.
 <6> The procedure sets `vector` as value for the property named `embedding` for the node at position `batchStart + index` in the `moviesList`.
-<7> Set to `1` the amount of batches to be processed at once.
-Concurrency in transactions was introduced in Cypher 5.21 (see link:{neo4j-docs-base-uri}/cypher-manual/current/subqueries/subqueries-in-transaction/#concurrent-transactions[`CALL` subqueries -> Concurrent transactions]).
+<7> Set to `1` the amount of batches to be processed at once (see link:{neo4j-docs-base-uri}/cypher-manual/current/subqueries/subqueries-in-transaction/#concurrent-transactions[`CALL` subqueries -> Concurrent transactions]).
 
 [NOTE]
 This example may not scale to larger datasets, as `collect(m)` requires the whole result set to be loaded in memory.
