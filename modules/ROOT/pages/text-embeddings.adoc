@@ -1,8 +1,10 @@
 :description: Create, store, and manipulate vector embeddings in a Neo4j database.
+:table-caption!:
 :test-setup-dump: https://github.com/neo4j-graph-examples/recommendations/raw/main/data/recommendations-5.26-block.dump
+:page-aliases: embeddings.adoc
 
 
-= Create and store embeddings in a Neo4j database
+= Create and store embeddings
 
 Neo4j's link:{neo4j-docs-base-uri}/cypher-manual/current/indexes/semantic-indexes/vector-indexes[vector indexes] and link:{neo4j-docs-base-uri}/cypher-manual/current/functions/vector[vector functions] allow you to calculate the similarity between node and relationship properties in a graph.
 A prerequisite for using these features is that vector embeddings have been set as properties of these entities.
@@ -28,23 +30,36 @@ The embeddings on this page are generated using the link:https://platform.openai
 
 
 [[single-embedding]]
-== Generate a single embedding and store it
+== Generate and store a single embedding
 
-Use the `genai.vector.encode()` function to generate a vector embedding for a single value.
+Use the `ai.text.embed()` function to generate a vector embedding for a single value.
 
-.Signature for `genai.vector.encode()` label:function[]
-[source,syntax]
-----
-ai.text.embed(resource :: STRING, provider :: STRING, configuration = {} :: MAP) :: VECTOR
-----
+.Signature for `ai.text.embed()`
+[role=label--function label--new-2025.11 label--Cypher-25]
+[cols="1,1,1,3"]
+|===
+|    *Syntax*        3+| `ai.text.embed(resource, provider, configuration = {}) :: VECTOR`
+|    *Description*   3+| Encode a resource as a vector using the named provider.
 
-resource (`STRING`):: The string to transform into an embedding.
-provider (`STRING`):: Case-insensitive identifier of the AI provider to use.
-See xref:reference/ai-providers.adoc[] for supported options.
-configuration (`MAP`):: Provider-specific options.
-See xref:reference/ai-providers.adoc[] for details of each supported provider.
+.4+| *Inputs* | *Name* | *Type* | *Description*
+   | `resource`
+   | `STRING`
+   | The string to transform into an embedding.
+
+   | `provider`
+   | `STRING`
+   | Case-insensitive identifier of the AI provider to use. See xref:providers[] for supported options.
+
+   |`configuration`
+   | `MAP`
+   | Provider-specific options.
+See xref:providers[] for details of each supported provider.
 Note that because this argument may contain sensitive data, it is obfuscated in the link:https://neo4j.com/docs/operations-manual/current/monitoring/logging/[query.log].
-However, if the function call is misspelled or the query is otherwise malformed, it may be logged without being obfuscated.
+However, if the function call is misspelled or the query is otherwise malformed, it will be logged without obfuscation.
+
+| *Returns*
+3+| Generated text based on the provided prompt.
+|===
 
 [NOTE]
 This function sends one API request every time it is called, which may result in a lot of overhead in terms of both network traffic and latency.
@@ -65,7 +80,7 @@ Storing `VECTOR` values on self-managed instances requires Enterprise Edition an
 MATCH (m:Movie {title:'Godfather, The'})
 WHERE m.plot IS NOT NULL AND m.title IS NOT NULL
 WITH m, m.title || ' ' || m.plot AS titleAndPlot // <1>
-WITH m, ai.text.embed(titleAndPlot, 'OpenAI', { token: $openaiToken }) AS vector // <2>
+WITH m, ai.text.embed(titleAndPlot, 'OpenAI', { token: $openaiToken, model: 'text-embedding-ada-002' }) AS vector // <2>
 SET m.embedding = vector // <3>
 RETURN m.embedding AS embedding
 ----
@@ -98,7 +113,7 @@ RETURN m.embedding AS embedding
 MATCH (m:Movie {title:'Godfather, The'})
 WHERE m.plot IS NOT NULL AND m.title IS NOT NULL
 WITH m, m.title || ' ' || m.plot AS titleAndPlot // <1>
-WITH m, ai.text.embed(titleAndPlot, 'OpenAI', { token: $openaiToken }) AS vector // <2>
+WITH m, ai.text.embed(titleAndPlot, 'OpenAI', { token: $openaiToken, model: 'text-embedding-ada-002' }) AS vector // <2>
 CALL db.create.setNodeVectorProperty(m, 'embedding', toFloatList(vector)) // <3>
 RETURN m.embedding AS embedding
 ----
@@ -123,36 +138,53 @@ The procedures link:https://neo4j.com/docs/operations-manual/current/procedures/
 
 
 [[multiple-embeddings]]
-== Generate a batch of embeddings and store them
+== Generate and store a batch of embeddings
 
 Use the `ai.text.embedBatch` procedure to generate many vector embeddings with a single API request.
 This procedure takes a list of resources as an input, and returns the same number of result rows.
+
+.Signature for `ai.text.embedBatch()`
+[role=label--procedure label--new-2025.11 label--Cypher-25]
+[cols="1,1,1,3"]
+|===
+|    *Syntax*        3+| `ai.text.embedBatch(resources, provider, configuration = {}) :: (index, resource, vector)`
+|    *Description*   3+| Encode a given batch of resources as vectors using the named provider.
+
+.4+| *Inputs* | *Name* | *Type* | *Description*
+   | `resources`
+   | `LIST<STRING>`
+   | The strings to transform into an embedding.
+
+   | `provider`
+   | `STRING`
+   | Case-insensitive identifier of the AI provider to use. See xref:providers[] for supported options.
+
+   |`configuration`
+   | `MAP`
+   | Provider-specific options.
+See xref:providers[] for details of each supported provider.
+Note that because this argument may contain sensitive data, it is obfuscated in the link:https://neo4j.com/docs/operations-manual/current/monitoring/logging/[query.log].
+However, if the function call is misspelled or the query is otherwise malformed, it will be logged without obfuscation.
+
+.4+| *Returns* | *Name* | *Type* | *Description*
+   | `index`
+   | `INTEGER`
+   | The index of the corresponding element in the input list, to correlate results back to inputs.
+
+   | `resource`
+   | `STRING`
+   | The given input resource.
+
+   |`vector`
+   | `VECTOR`
+   | The generated vector embedding for this resource.
+|===
 
 [IMPORTANT]
 ====
 This procedure attempts to generate embeddings for all supplied resources in a single API request.
 Providing too many resources may cause the AI provider to time out or to reject the request.
 ====
-
-.Signature for `ai.text.embedBatch` label:procedure[]
-[source,syntax]
-----
-ai.text.embedBatch(resources :: LIST<STRING>, provider :: STRING, configuration :: MAP = {}) :: (index :: INTEGER, resource :: STRING, vector :: VECTOR)
-----
-
-resources (`LIST<STRING>`):: The strings to transform into embeddings.
-provider (`STRING`):: Case-insensitive identifier of the provider to use.
-See xref:reference/ai-providers.adoc[] for supported options.
-configuration (`MAP`):: Provider-specific options.
-See xref:reference/ai-providers.adoc[] for details of each supported provider.
-Note that because this argument may contain sensitive data, it is obfuscated in the link:https://neo4j.com/docs/operations-manual/current/monitoring/logging/[query.log].
-However, if the function call is misspelled or the query is otherwise malformed, it will be logged without being obfuscated.
-
-Each returned row contains the following columns:
-
-index (`INTEGER`):: The index of the corresponding element in the input list, to correlate results back to inputs.
-resource (`STRING`):: The given input resource.
-vector (`VECTOR`):: The generated vector embedding for this resource.
 
 [.tabbed-example]
 ====
@@ -166,12 +198,10 @@ Storing `VECTOR` values on an on-prem instance requires Enterprise Edition and l
 .Create embeddings from a limited number of properties and store them as `VECTOR` properties
 [source,cypher]
 ----
-MATCH (m:Movie WHERE m.plot IS NOT NULL)
-WITH m
-LIMIT 20
+MATCH (m:Movie WHERE m.plot IS NOT NULL) LIMIT 20
 WITH collect(m) AS moviesList // <1>
 WITH moviesList, [movie IN moviesList | movie.title || ': ' || movie.plot] AS batch // <2>
-CALL ai.text.embedBatch(batch, 'OpenAI', { token: $openaiToken }) YIELD index, vector
+CALL ai.text.embedBatch(batch, 'OpenAI', { token: $openaiToken, model: 'text-embedding-ada-002' }) YIELD index, vector
 WITH moviesList, index, vector
 MATCH (toUpdate:Movie {title: moviesList[index]['title']})
 SET toUpdate.embedding = vector  // <3>
@@ -184,14 +214,14 @@ SET toUpdate.embedding = vector  // <3>
 .Create embeddings from a large number properties and store them as `VECTOR` properties
 [source, cypher]
 ----
-MATCH (m:Movie WHERE m.plot IS NOT NULL)
+MATCH (m:Movie WHERE m.plot IS NOT NULL) LIMIT 500
 WITH collect(m) AS moviesList, // <1>
      count(*) AS total,
      100 AS batchSize // <2>
 UNWIND range(0, total-1, batchSize) AS batchStart // <3>
 CALL (moviesList, batchStart, batchSize) { // <4>
     WITH [movie IN moviesList[batchStart .. batchStart + batchSize] | movie.title || ': ' || movie.plot] AS batch // <5>
-    CALL ai.text.embedBatch(batch, 'OpenAI', { token: $openaiToken }) YIELD index, vector
+    CALL ai.text.embedBatch(batch, 'OpenAI', { token: $openaiToken, model: 'text-embedding-ada-002' }) YIELD index, vector
     MATCH (toUpdate:Movie {title: moviesList[batchStart + index]['title']})
     SET toUpdate.embedding = vector // <6>
 } IN CONCURRENT TRANSACTIONS OF 1 ROW // <7>
@@ -225,12 +255,10 @@ For an alternative method more suitable to processing large amounts of data, see
 .Create embeddings from a limited number of properties and store them as `LIST<FLOAT>` properties
 [source, cypher]
 ----
-MATCH (m:Movie WHERE m.plot IS NOT NULL)
-WITH m
-LIMIT 20
+MATCH (m:Movie WHERE m.plot IS NOT NULL) LIMIT 20
 WITH collect(m) AS moviesList // <1>
 WITH moviesList, [movie IN moviesList | movie.title || ': ' || movie.plot] AS batch // <2>
-CALL ai.text.embedBatch(batch, 'OpenAI', { token: $openaiToken }) YIELD index, vector
+CALL ai.text.embedBatch(batch, 'OpenAI', { token: $openaiToken, model: 'text-embedding-ada-002' }) YIELD index, vector
 WITH moviesList, index, vector
 CALL db.create.setNodeVectorProperty(moviesList[index], 'embedding', toFloatList(vector)) // <3>
 ----
@@ -243,14 +271,14 @@ The procedures link:https://neo4j.com/docs/operations-manual/current/procedures/
 .Create embeddings from a large number properties and store them as `LIST<FLOAT>` values
 [source, cypher]
 ----
-MATCH (m:Movie WHERE m.plot IS NOT NULL)
+MATCH (m:Movie WHERE m.plot IS NOT NULL) LIMIT 500
 WITH collect(m) AS moviesList, // <1>
      count(*) AS total,
      100 AS batchSize // <2>
 UNWIND range(0, total-1, batchSize) AS batchStart // <3>
 CALL (moviesList, batchStart, batchSize) { // <4>
     WITH [movie IN moviesList[batchStart .. batchStart + batchSize] | movie.title || ': ' || movie.plot] AS batch // <5>
-    CALL ai.text.embedBatch(batch, 'OpenAI', { token: $openaiToken }) YIELD index, vector
+    CALL ai.text.embedBatch(batch, 'OpenAI', { token: $openaiToken, model: 'text-embedding-ada-002' }) YIELD index, vector
     CALL db.create.setNodeVectorProperty(moviesList[batchStart + index], 'embedding', toFloatList(vector)) // <6>
 } IN CONCURRENT TRANSACTIONS OF 1 ROW // <7>
 ----
@@ -274,3 +302,341 @@ For an alternative method more suitable to processing large amounts of data, see
 
 ======
 ====
+
+
+[[providers]]
+== Providers
+
+You can crate vector embeddings via the following providers:
+
+- OpenAI (`openai`)
+- Azure OpenAI (`azure-openai`)
+- Google Vertex AI (`vertexai`)
+- Amazon Bedrock Titan Models (`bedrock-titan`)
+
+The query `CALL ai.text.embed.providers()` (see xref:reference/functions-procedures.adoc#ai-text-embed-providers[reference]) shows the list of supported providers in the installed version of the plugin.
+
+
+[[providers-openai]]
+=== OpenAI
+
+.OpenAI parameters
+[opts=header, cols="1,1,1,3"]
+|===
+| *Name*          | *Type*   | *Default* | *Description*
+| `model`         | `STRING` | -         | Model ID (see https://platform.openai.com/docs/models[OpenAI -> Models]).
+| `token`         | `STRING` | -         | OpenAI API key (see https://platform.openai.com/api-keys[OpenAI -> API Keys]).
+| `vendorOptions` | `MAP`    | `{}`      | Optional vendor options that will be passed on as-is in the request to Open AI (see https://platform.openai.com/docs/api-reference/embeddings/create[OpenAI -> Create embeddings]).
+|===
+
+.Example -- Embed the string `Hello World!`
+[source, cypher, test-result-skip]
+----
+WITH
+  {
+    token: $openaiToken,
+    model: 'text-embedding-ada-002',
+    vendorOptions: {
+      dimensions: 1024
+    }
+  } AS conf
+RETURN ai.text.embed('Hello World!', 'openai', conf) AS result
+----
+
+
+[[providers-azure-openai]]
+=== Azure OpenAI
+
+.OpenAI parameters
+[opts=header, cols="1,1,1,3"]
+|===
+| *Name*          | *Type*   | *Default* | *Description*
+| `model`         | `STRING` | -         | Model id (see https://learn.microsoft.com/en-us/azure/ai-foundry/openai/overview[Azure -> Azure OpenAI in Foundry Models]).
+| `resource`      | `STRING` | -         | Azure resource name.
+| `token`         | `STRING` | -         | Azure OAuth2 bearer token.
+| `vendorOptions` | `MAP`    | `{}`      | Optional vendor options that will be passed on as-is in the request to Azure.
+|===
+
+.Example -- Embed the string `Hello World!`
+[source, cypher]
+----
+WITH
+  {
+    token: $azureToken,
+    resource: 'my-azure-openai-resource',
+    model: 'text-embedding-3-small',
+    vendorOptions: {
+      dimensions: 1024
+    }
+  } AS conf
+RETURN ai.text.embed('Hello World!', 'azure-openai', conf) AS result
+----
+
+
+[[providers-google-vertexai]]
+=== Google VertexAI
+
+.VertexAI parameters
+[opts=header, cols="1,1,1,3"]
+|===
+| *Name*          | *Type*   | *Default*  | *Description*
+| `model`         | `STRING` | -          | Model resource name (see https://console.cloud.google.com/vertex-ai/model-garden[Vertex AI -> Model Garden]).
+| `project`       | `STRING` | -          | Google Cloud project ID.
+| `region`        | `STRING` | -          | Google cloud region (see https://cloud.google.com/vertex-ai/docs/general/locations[Vertex AI -> Locations]).
+| `publisher`     | `STRING` | `'google'` | Model publisher.
+| `token`         | `STRING` | -          | Vertex API access token.
+| `vendorOptions` | `MAP`    | `{}`       | Optional vendor options that will be passed on as-is in the request to Vertex (see https://cloud.google.com/vertex-ai/generative-ai/docs/reference/rest/v1/projects.locations.publishers.models/predict[Vertex AI -> Method: models.predict]).
+|===
+
+.Example -- Embed the string `Hello World!`
+[source, cypher]
+----
+WITH
+  {
+    token: $vertexaiApiAccessKey,
+    model: 'gemini-embedding-001',
+    publisher: 'google',
+    project: 'my-google-cloud-project',
+    region: 'asia-northeast1',
+    vendorOptions: {
+      outputDimensionality: 1024
+    }
+  } AS conf
+RETURN ai.text.embed('Hello World!', 'vertexai', conf) AS result
+----
+
+
+[[providers-amazon-bedrock-titan]]
+=== Amazon Bedrock Titan Models
+
+This provider supports all models that use the same request parameters and response fields as the https://docs.aws.amazon.com/bedrock/latest/userguide/titan-embedding-models.html[Titan text models].
+
+.Amazon Bedrock Titan Configuration
+[opts=header, cols="1,1,1,3"]
+|===
+| *Name*            | *Type*   | *Default* | *Description*
+| `model`           | `STRING` | -         | Model ID or its ARN.
+| `region`          | `STRING` | -         | Amazon region (see https://docs.aws.amazon.com/bedrock/latest/userguide/models-regions.html[Amazon Bedrock -> Model Support]).
+| `accessKeyId`     | `STRING` | -         | Amazon access key ID.
+| `secretAccessKey` | `STRING` | -         | Amazon secret access key.
+| `vendorOptions`   | `MAP`    | `{}`      | Optional vendor options that will be passed on as-is in the request to Bedrock (see https://docs.aws.amazon.com/bedrock/latest/userguide/model-parameters.html[Amazon Bedrock -> Inference request parameters and response fields]).
+|===
+
+.Example -- Embed the string `Hello World!`
+[source, cypher]
+----
+WITH
+  {
+    accessKeyId: $awsAccessKeyId,
+    secretAccessKey: $secretAccessKey,
+    model: 'amazon.titan-embed-text-v1',
+    region: 'eu-west-2',
+    vendorOptions: {
+      dimensions: 1024
+    }
+  } AS conf
+RETURN ai.text.embed('Hello World!', 'bedrock-titan', conf) AS result
+----
+
+
+[role=label--deprecated-2025.11]
+[[legacy-ai-providers]]
+== (Legacy) AI Providers
+
+The following provider configurations are for the `genai.vector.encode` function and the `genai.vector.encodeBatch` procedure.
+Both callables have been deprecated in 2025.11 and superseded by xref:single-embedding[`ai.text.embed`] and xref:multiple-embeddings[`ai.text.embedBatch`].
+For more information on the old callables, see link:https://neo4j.com/docs/genai/plugin/5/embeddings/[documentation for the previous version].
+
+
+[[legacy-provider-openai]]
+=== OpenAI
+
+* Identifier (`provider` argument): `"OpenAI"`
+* https://platform.openai.com/docs/guides/embeddings[Official OpenAI documentation]
+
+.Configuration map
+[%header,cols="1m,1m,3a,2"]
+|===
+| Key | Type | Description | Default
+
+| token
+| STRING
+| API access token.
+| label:required[]
+
+| model
+| STRING
+| The name of the model to invoke.
+| `"text-embedding-ada-002"`
+
+| dimensions
+| INTEGER
+| The number of dimensions to reduce the vector to. Only supported for certain models.
+| Model-dependent.
+|===
+
+
+[[legacy-provider-vertex-ai]]
+=== Vertex AI
+
+* Identifier (`provider` argument): `"VertexAI"`
+* https://cloud.google.com/vertex-ai/generative-ai/docs/embeddings/get-text-embeddings[Official Vertex AI documentation]
+
+.Configuration map
+[%header,cols="1m,1m,3a,2"]
+|===
+| Key | Type | Description | Default
+
+| token
+| STRING
+| API access token.
+| label:required[]
+
+| projectId
+| STRING
+| GCP project ID.
+| label:required[]
+
+| model
+| STRING
+| The name of the model to invoke. +
+| `"textembedding-gecko@001"`
+
+| region
+| STRING
+| GCP region where to send the API requests. +
+ +
+
+.Supported values
+[%collapsible]
+====
+* `"us-west1"`
+* `"us-west2"`
+* `"us-west3"`
+* `"us-west4"`
+* `"us-central1"`
+* `"us-east1"`
+* `"us-east4"`
+* `"us-south1"`
+* `"northamerica-northeast1"`
+* `"northamerica-northeast2"`
+* `"southamerica-east1"`
+* `"southamerica-west1"`
+* `"europe-west2"`
+* `"europe-west1"`
+* `"europe-west4"`
+* `"europe-west6"`
+* `"europe-west3"`
+* `"europe-north1"`
+* `"europe-central2"`
+* `"europe-west8"`
+* `"europe-west9"`
+* `"europe-southwest1"`
+* `"asia-south1"`
+* `"asia-southeast1"`
+* `"asia-southeast2"`
+* `"asia-east2"`
+* `"asia-east1"`
+* `"asia-northeast1"`
+* `"asia-northeast2"`
+* `"australia-southeast1"`
+* `"australia-southeast2"`
+* `"asia-northeast3"`
+* `"me-west1"`
+====
+| `"us-central1"`
+
+| taskType
+| STRING
+| The intended downstream application (see link:https://cloud.google.com/vertex-ai/generative-ai/docs/embeddings/get-text-embeddings/[provider documentation]). The specified `taskType` will apply to all resources in a batch.
+|
+
+| title
+| STRING
+| The title of the document that is being encoded (see link:https://cloud.google.com/vertex-ai/generative-ai/docs/embeddings/get-text-embeddings/[provider documentation]). The specified `title` will apply to all resources in a batch.
+|
+|===
+
+
+[[legacy-provider-azure-openai]]
+=== Azure OpenAI
+
+* Identifier (`provider` argument): `"AzureOpenAI"`
+* https://learn.microsoft.com/en-us/azure/ai-foundry/[Official Azure OpenAI documentation]
+
+[NOTE]
+Unlike the other providers, the model is configured when creating the deployment on Azure, and is thus not part of the configuration map.
+
+.Configuration map
+[%header,cols="1m,1m,3a,2"]
+|===
+| Key | Type | Description | Default
+
+| token
+| STRING
+| API access token.
+| label:required[]
+
+| resource
+| STRING
+| The name of the resource to which the model has been deployed.
+| label:required[]
+
+| deployment
+| STRING
+| The name of the model deployment.
+| label:required[]
+
+| dimensions
+| INTEGER
+| The number of dimensions to reduce the vector to. Only supported for certain models.
+| Model-dependent.
+|===
+
+
+[[legacy-provider-amazon-bedrock]]
+=== Amazon Bedrock
+
+* Identifier (`provider` argument): `"Bedrock"`
+* https://docs.aws.amazon.com/bedrock/latest/APIReference/welcome.html[Official Bedrock documentation]
+
+.Configuration map
+[%header,cols="1m,1m,3a,2"]
+|===
+| Key | Type | Description | Default
+
+| accessKeyId
+| STRING
+| AWS access key ID.
+| label:required[]
+
+| secretAccessKey
+| STRING
+| AWS secret key.
+| label:required[]
+
+| model
+| STRING
+| The name of the model to invoke. +
+ +
+Supported values: +
+ +
+
+* `"amazon.titan-embed-text-v1"`
+| `"amazon.titan-embed-text-v1"`
+
+| region
+| STRING
+| AWS region where to send the API requests. +
+ +
+Supported values: +
+ +
+
+* `"us-east-1"`
+* `"us-west-2"`
+* `"ap-southeast-1"`
+* `"ap-northeast-1"`
+* `"eu-central-1"`
+| `"us-east-1"`
+
+|===

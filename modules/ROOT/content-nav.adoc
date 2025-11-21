@@ -1,9 +1,8 @@
 * xref:index.adoc[]
 
-* xref:embeddings.adoc[]
+* xref:text-embeddings.adoc[]
 * xref:generate-text.adoc[]
 
 * *Reference*
 
 * xref:reference/functions-procedures.adoc[]
-* xref:reference/ai-providers.adoc[]
