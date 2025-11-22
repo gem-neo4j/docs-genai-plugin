@@ -446,8 +446,8 @@ RETURN ai.text.embed('Hello World!', 'bedrock-titan', conf) AS result
 
 
 [role=label--deprecated-2025.11]
-[[legacy-ai-providers]]
-== (Legacy) AI Providers
+[[legacy-providers]]
+== (Legacy) Providers
 
 The following provider configurations are for the `genai.vector.encode` function and the `genai.vector.encodeBatch` procedure.
 Both callables have been deprecated in 2025.11 and superseded by xref:single-embedding[`ai.text.embed`] and xref:multiple-embeddings[`ai.text.embedBatch`].
