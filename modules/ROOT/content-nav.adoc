@@ -1,6 +1,6 @@
 * xref:index.adoc[]
 
-* xref:text-embeddings.adoc[]
+* xref:embeddings.adoc[]
 * xref:generate-text.adoc[]
 
 * *Reference*
