@@ -1,8 +1,6 @@
 :description: Create, store, and manipulate vector embeddings in a Neo4j database.
 :table-caption!:
 :test-setup-dump: https://github.com/neo4j-graph-examples/recommendations/raw/main/data/recommendations-5.26-block.dump
-:page-aliases: embeddings.adoc
-
 
 = Create and store embeddings
 
@@ -349,6 +347,16 @@ WITH
 RETURN ai.text.embed('Hello World!', 'openai', conf) AS result
 ----
 
+[NOTE]
+You can change the base URL used by the OpenAI provider (default: https://api.openai.com) via the `genai.openai.baseurl` setting.
+This applies to all `ai.text.*` calls that use OpenAI, including `ai.text.embed`, `ai.text.embedBatch` and `ai.text.completion`.
+See xref:reference/config.adoc#_genai_genai_openai_baseurl[Configuration Options -> genai.openai.baseurl].
+
+.Example genai.conf
+[source,ini]
+----
+genai.openai.baseurl=https://my-openai-proxy.example.com
+----
 
 [[providers-azure-openai]]
 === Azure OpenAI
@@ -390,9 +398,13 @@ RETURN ai.text.embed('Hello World!', 'azure-openai', conf) AS result
 | `project`       | `STRING` | -          | Google Cloud project ID.
 | `region`        | `STRING` | -          | Google cloud region (see https://cloud.google.com/vertex-ai/docs/general/locations[Vertex AI -> Locations]).
 | `publisher`     | `STRING` | `'google'` | Model publisher.
-| `token`         | `STRING` | -          | Vertex API access token.
+| `apiKey`        | `STRING` | -          | Vertex AI API key.
+| `token`         | `STRING` | -          | Vertex AI API access token.
 | `vendorOptions` | `MAP`    | `{}`       | Optional vendor options that will be passed on as-is in the request to Vertex (see https://cloud.google.com/vertex-ai/generative-ai/docs/reference/rest/v1/projects.locations.publishers.models/predict[Vertex AI -> Method: models.predict]).
 |===
+
+[NOTE]
+Exactly one of `apiKey` or `token` must be provided.
 
 .Example -- Embed the string `Hello World!`
 [source, cypher]

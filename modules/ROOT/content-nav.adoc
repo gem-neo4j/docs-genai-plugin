@@ -6,3 +6,5 @@
 * *Reference*
 
 * xref:reference/functions-procedures.adoc[]
+* xref:reference/deprecations-additions-removals-compatibility.adoc[]
+* xref:reference/config.adoc[]

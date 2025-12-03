@@ -1,0 +1,55 @@
+[[config]]
+= Configuration Options
+:description: This chapter gives an overview of all the configuration options used by the GenAI plugin.
+
+[#_location_of_config_options]
+== Location of config options
+
+Configuration options for the GenAI plugin can be set using a configuration file called `genai.conf`.
+This file must be located in the same folder as `neo4j.conf` (by default located in `neo4j/conf`).
+
+[NOTE]
+====
+The `genai.conf` file is not created automatically when installing the GenAI plugin.
+Users have to create the file themselves.
+====
+
+[[config-reference]]
+== Reference of config options
+
+[#_genai_genai_openai_baseurl]
+.genai.openai.baseurl
+[cols="<1s,<4"]
+|===
+|Description
+a|Updates the base URL used by the openAI provider in `ai.text.*` functions and procedures.
+|Valid values
+a|`STRING`
+|Default value
+m|+++https://api.openai.com+++
+|===
+
+[[config-command-expansion]]
+== Command Expansion
+
+Command expansion provides an additional capability to configure GenAI by allowing scripts that set values sourced from external files to be specified.
+This is especially useful for:
+
+* Avoiding setting sensitive information, such as usernames, passwords, keys, etc., in the `genai.conf` file as plain text.
+* Handling the configuration settings of instances running in environments where the file system is not accessible.
+
+These scripts can be specified in the `genai.conf` file.
+They must begin with `$` and be within parentheses `()`.
+For example: `genai.setting=$(script_to_execute)`.
+
+GenAI leverages Neo4j's command expansion capability.
+See the https://neo4j.com/docs/operations-manual/current/configuration/neo4j-conf/#neo4j-conf-expand-commands[Operations Manual -> The Neo4j conf. file] for more information.
+
+To enable command expansions, Neo4j must be started with the argument `--expand-commands`.
+
+[source,bash,subs=attributes]
+----
+bin/neo4j start --expand-commands
+----
+
+If the startup script does not receive the `--expand-commands` argument, commands in the configuration file are treated as invalid settings.
