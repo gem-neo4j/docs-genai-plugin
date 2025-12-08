@@ -1,0 +1,64 @@
+= Changelog
+:description: Features that have been removed, deprecated, added, or extended in the GenAI plugin.
+:test-skip: true  // all deprecations would fail.
+
+// Order of subsections:
+//  1. Removed features
+//  2. Deprecated features
+//  3. Restricted features
+//  4. Updated features
+//  5. New features
+
+This section lists all of the features that have been removed, deprecated, added, or extended in different versions of the GenAI plugin.
+
+[IMPORTANT]
+Cypher 25 was introduced in Neo4j 2025.06 and can only be used on Neo4j 2025.06+ databases.
+For more information, see link:{neo4j-docs-base-uri}/cypher-manual/25/queries/select-version[Cypher Manual -> Select Cypher version].
+
+[[neo4j-2025.11]]
+== Neo4j 2025.11
+
+=== New in Cypher 25
+
+[cols="2", options="header"]
+|===
+| Feature
+| Details
+
+a|
+[source, cypher]
+----
+RETURN ai.text.completion(prompt, provider, configuration)
+----
+| New function xref:reference/functions-procedures.adoc#ai-text-completion[`ai.text.completion()`] for generating text with external AI providers.
+See xref:generate-text.adoc[].
+
+a|
+[source, cypher]
+----
+RETURN ai.text.embed(resource, provider, configuration)
+
+CALL ai.text.embedBatch(resources, provider, configuration) YIELD index, vector
+----
+| New function xref:reference/functions-procedures.adoc#ai-text-embed[`ai.text.embed`] and procedure xref:reference/functions-procedures.adoc#ai-text-embed-batch[`ai.text.embedBatch`] for generating vector embeddings.
+See xref:embeddings.adoc[].
+
+|===
+
+=== Deprecated in Cypher 25
+
+[cols="2", options="header"]
+|===
+| Feature
+| Details
+
+a|
+[source, cypher]
+----
+RETURN genai.vector.encode(resource, provider, configuration)
+
+CALL genai.vector.encodeBatch(resources, provider, configuration)
+----
+| The function `genai.vector.encode()` and the procedure `genai.vector.encodeBatch()` are deprecated and replaced by `ai.text.embed()` and `ai.text.embedBatch()`.
+|===
+
