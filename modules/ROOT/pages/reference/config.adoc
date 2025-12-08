@@ -1,55 +1,65 @@
-[[config]]
-= Configuration Options
-:description: This chapter gives an overview of all the configuration options used by the GenAI plugin.
+= Configuration settings
+:description: Neo4j configuration options used by the GenAI plugin.
+:page-role: not-on-aura
 
-[#_location_of_config_options]
-== Location of config options
+[[config-location]]
+== Location of configuration settings
 
-Configuration options for the GenAI plugin can be set using a configuration file called `genai.conf`.
-This file must be located in the same folder as `neo4j.conf` (by default located in `neo4j/conf`).
+You can set configuration settings for the GenAI plugin via a file called `genai.conf`.
+This file must be located in the same folder as `neo4j.conf` (by default `<NEO4J_HOME>/conf`).
+Configuration is only possible on self-managed instances.
 
 [NOTE]
 ====
 The `genai.conf` file is not created automatically when installing the GenAI plugin.
-Users have to create the file themselves.
+You need to create manually it the first time.
 ====
 
 [[config-reference]]
-== Reference of config options
+== List of settings
 
-[#_genai_genai_openai_baseurl]
+[[config-genai.openai.baseurl]]
 .genai.openai.baseurl
 [cols="<1s,<4"]
 |===
 |Description
-a|Updates the base URL used by the openAI provider in `ai.text.*` functions and procedures.
+a|Sets the base URL used by the OpenAI provider in `ai.text.*` functions and procedures.
 |Valid values
 a|`STRING`
 |Default value
 m|+++https://api.openai.com+++
 |===
 
-[[config-command-expansion]]
-== Command Expansion
 
-Command expansion provides an additional capability to configure GenAI by allowing scripts that set values sourced from external files to be specified.
+[[example-genai.conf]]
+== Example genai.conf
+
+[source,ini]
+----
+genai.openai.baseurl=https://my-openai-proxy.example.com
+----
+
+
+[[command-expansion]]
+== Command expansion in setting values
+
+GenAI settings can take commands as values.
 This is especially useful for:
 
-* Avoiding setting sensitive information, such as usernames, passwords, keys, etc., in the `genai.conf` file as plain text.
-* Handling the configuration settings of instances running in environments where the file system is not accessible.
+* Avoiding sensitive information in the `genai.conf` file as plain text.
+* Handling the configuration of instances in environments where the file system is not accessible.
 
-These scripts can be specified in the `genai.conf` file.
-They must begin with `$` and be within parentheses `()`.
+Commands must begin with `$` and be within parentheses `()`.
 For example: `genai.setting=$(script_to_execute)`.
 
-GenAI leverages Neo4j's command expansion capability.
-See the https://neo4j.com/docs/operations-manual/current/configuration/neo4j-conf/#neo4j-conf-expand-commands[Operations Manual -> The Neo4j conf. file] for more information.
-
 To enable command expansions, Neo4j must be started with the argument `--expand-commands`.
+Without that, commands in setting values are treated as invalid settings.
 
-[source,bash,subs=attributes]
+[source,bash]
 ----
 bin/neo4j start --expand-commands
 ----
 
-If the startup script does not receive the `--expand-commands` argument, commands in the configuration file are treated as invalid settings.
+[NOTE]
+The GenAI plugin uses Neo4j's command expansion capability.
+See https://neo4j.com/docs/operations-manual/current/configuration/neo4j-conf/#neo4j-conf-expand-commands[Operations Manual -> The neo4j.conf file] for more information.

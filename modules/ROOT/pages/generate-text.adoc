@@ -298,15 +298,10 @@ RETURN ai.text.completion('Name a movie', 'openai', conf) AS result
 ----
 
 [NOTE]
-You can change the base URL used by the OpenAI provider (default: https://api.openai.com) via the `genai.openai.baseurl` setting.
-This applies to all `ai.text.*` calls that use OpenAI, including `ai.text.embed` and `ai.text.embedBatch`.
-See xref:reference/config.adoc#_genai_genai_openai_baseurl[Configuration Options -> genai.openai.baseurl].
+You can change OpenAI's base URL (default: https://api.openai.com) via the `genai.openai.baseurl` setting.
+The change applies to all `ai.text.*` calls that use OpenAI, including `ai.text.embed`, `ai.text.embedBatch` and `ai.text.completion`.
+See xref:reference/config.adoc#config-genai.openai.baseurl[Configuration Options -> genai.openai.baseurl].
 
-.Example genai.conf
-[source,ini]
-----
-genai.openai.baseurl=https://my-openai-proxy.example.com
-----
 
 [[providers-azure-openai]]
 === Azure OpenAI
