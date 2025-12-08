@@ -1,3 +1,4 @@
+:description: Generate text based on a textual input prompt, similar to submitting a prompt to an Large Language Model (LLM).
 :page-role: new---2025.11
 :table-caption!:
 :test-setup-dump: https://github.com/neo4j-graph-examples/recommendations/raw/main/data/recommendations-5.26-block.dump
@@ -8,7 +9,7 @@
 The function `ai.text.completion` can be used to generate text based on a textual input prompt.
 It is similar to submitting a prompt to an LLM.
 
-[role=label--function label--new-2025.11 label--Cypher-25]
+[role=label--function label--new-2025.11]
 [cols="1,1,1,3"]
 .Signature for `ai.text.completion`
 |===
