@@ -15,6 +15,50 @@ This section lists all of the features that have been removed, deprecated, added
 Cypher 25 was introduced in Neo4j 2025.06 and can only be used on Neo4j 2025.06+ databases.
 For more information, see link:{neo4j-docs-base-uri}/cypher-manual/25/queries/select-version[Cypher Manual -> Select Cypher version].
 
+[[neo4j-2025.12]]
+== Neo4j 2025.12
+
+=== Updated in Cypher 25
+
+[cols="2", options="header"]
+|===
+| Feature
+| Details
+
+a|
+[source, cypher]
+----
+RETURN ai.text.completion(prompt, provider, configuration)
+----
+| The configuration now accepts `chatHistory`, see the specific xref:generate-text.adoc#providers[provider] details for more information.
+
+|===
+
+=== New in Cypher 25
+
+[cols="2", options="header"]
+|===
+| Feature
+| Details
+
+a|
+[source, cypher]
+----
+RETURN ai.text.chat(prompt, chatId, provider, configuration)
+----
+| New function xref:reference/functions-procedures.adoc#ai-text-chat[`ai.text.chat()`] for conversational interactions that can continue prior responses.
+See xref:generate-text.adoc#_chat_with_context[Generate text -> Chat with context].
+
+a|
+[source, cypher]
+----
+RETURN ai.text.chat.providers()
+----
+| New procedure xref:reference/functions-procedures.adoc#ai-text-chat-providers[`ai.text.chat.providers()`] for information on the available providers for the `ai.text.chat()` function.
+See xref:generate-text.adoc#_chat_with_context[Generate text -> Chat with context].
+
+|===
+
 [[neo4j-2025.11]]
 == Neo4j 2025.11
 
