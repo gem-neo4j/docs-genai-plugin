@@ -29,8 +29,10 @@ a|
 [source, cypher]
 ----
 RETURN ai.text.completion(prompt, provider, configuration)
+
+CALL ai.text.completion.providers() YIELD name, requiredConfigType, optionalConfigType, defaultConfig
 ----
-| New function xref:reference/functions-procedures.adoc#ai-text-completion[`ai.text.completion()`] for generating text with external AI providers.
+| New function xref:reference/functions-procedures.adoc#ai-text-completion[`ai.text.completion()`] for generating text with external AI providers and new procedure xref:reference/functions-procedures.adoc#ai-text-completion-providers[`ai.text.completion.providers()`] which gives information about the available providers for the function and their config setup.
 See xref:generate-text.adoc[].
 
 a|
@@ -39,8 +41,10 @@ a|
 RETURN ai.text.embed(resource, provider, configuration)
 
 CALL ai.text.embedBatch(resources, provider, configuration) YIELD index, vector
+
+CALL ai.text.embed.providers() YIELD name, requiredConfigType, optionalConfigType, defaultConfig
 ----
-| New function xref:reference/functions-procedures.adoc#ai-text-embed[`ai.text.embed`] and procedure xref:reference/functions-procedures.adoc#ai-text-embed-batch[`ai.text.embedBatch`] for generating vector embeddings.
+| New function xref:reference/functions-procedures.adoc#ai-text-embed[`ai.text.embed`] and procedure xref:reference/functions-procedures.adoc#ai-text-embed-batch[`ai.text.embedBatch`] for generating vector embeddings. There is also a new procedure xref:reference/functions-procedures.adoc#ai-text-embed-providers[`ai.text.embed.providers()`] which gives information about the available providers for the function/procedure and their config setup.
 See xref:embeddings.adoc[].
 
 |===
