@@ -1,0 +1,357 @@
+:description: Generate structured output based on a textual input prompt and schema, similar to submitting a prompt to a Large Language Model (LLM).
+:page-role: new---2026.02
+:table-caption!:
+
+= Generate structured output
+
+The function `ai.text.structuredCompletion` can be used to generate structured output (a map) based on a textual input prompt and a schema represented as a Cypher map that describes the desired output structure.
+It is similar to submitting a prompt to an LLM, but with additional guarantees that the output conforms to your schema.
+
+[role=label--function label--new-2026.02]
+[cols="1,1,1,3"]
+.Signature for `ai.text.structuredCompletion`
+|===
+|    *Syntax*        3+| `ai.text.structuredCompletion(prompt, schema, provider, configuration = {}) :: MAP`
+|    *Description*   3+| Generate structured output as a map based on the specified prompt and JSON schema.
+.5+| *Inputs* | *Name*          | *Type*   | *Description*
+| `prompt`        | `STRING` | The prompt to generate output from.
+| `schema`        | `MAP`    | A map describing the JSON schema for the desired output.
+| `provider`      | `STRING` | The identifier of the provider: 'Azure-OpenAI', 'Bedrock', 'OpenAI', 'VertexAI'.
+| `configuration` | `MAP`    | Provider specific configuration, use `CALL ai.text.structuredCompletion.providers()` to find the configuration needed for each provider. You can specify additional vendor options by adding `vendorOptions` with a map of values that will be passed along in the request.
+| *Returns*          3+| `MAP` — a structured map conforming to the provided schema.
+|===
+
+[[schema-requirements]]
+== Schema Requirements
+
+The `schema` argument is a Cypher map that must follow the JSON schema specifications of the chosen provider. While most providers support standard JSON schema types (`string`, `number`, `boolean`, `object`, `array`), there are important differences in strictness and supported keywords.
+
+=== Provider Specifics
+
+[cols="1,3"]
+|===
+| Provider | Schema Guidelines
+
+| **OpenAI** / **Azure-OpenAI**
+a| Uses a strict subset of JSON Schema. See the https://platform.openai.com/docs/guides/structured-outputs#supported-schemas[OpenAI docs] for more info.
+
+* All object properties must be listed as `required`.
+* All objects must specify `additionalProperties: false`.
+* Supported types include `string`, `number`, `boolean`, `integer`, `object`, `array`, `enum`, and `anyOf`.
+
+| **Vertex AI**
+a| Uses a subset of the OpenAPI 3.0 Schema Object. See the https://docs.cloud.google.com/vertex-ai/docs/reference/rest/v1/projects.locations.cachedContents#Schema[VertexAI docs] for more info.
+
+* Best suited for flat or moderately nested structures.
+* Ensure you check for specific keyword support (e.g., `nullable`).
+
+| **Bedrock**
+a| Leverages the Converse API's tool definition format.
+
+* While more flexible, it is recommended to follow the OpenAPI 3.0 schema standard for maximum compatibility across different foundation models (e.g., Anthropic Claude vs. Amazon Nova).
+
+|===
+
+[NOTE]
+====
+If you provide a schema with unsupported keywords for a specific provider, the function will return an error from the provider's API. Always start with a simple schema and increase complexity incrementally.
+====
+
+== Example
+
+The example below asks the model for cookie recipe ideas, and have them output as a map adhering to the given schema.
+
+[.tabbed-example]
+====
+[.include-with-OpenAI]
+======
+[source, cypher]
+----
+WITH
+  {
+    type: 'object',
+    properties: {
+      recipes: {
+        type: 'array',
+        items: {
+          type: 'object',
+          properties: {name: {type: "string"}, description: {type: "string"}},
+          required: ["name", "description"],
+          additionalProperties: false
+        }
+      }
+    },
+    required: ['recipes'],
+    additionalProperties: false
+  } AS schema,
+  {token: $openaiToken, model: 'gpt-5-nano'} AS conf
+RETURN
+  ai.text.structuredCompletion(
+    'Hello! Can you give me a list of 5 cookie recipes, just their name and description',
+    schema,
+    'openai',
+    conf
+  ) AS result
+----
+
+[role="queryresult",options="header",cols="1"]
+|===
+| result
+a| [source]
+----
+{
+  recipes: [
+    {
+      name: "Chocolate Chip Cookies",
+      description: "Classic chewy cookies loaded with semisweet chocolate chips and vanilla."
+    },
+    {
+      name: "Peanut Butter Cookies",
+      description: "Soft, peanut-buttery cookies with a slightly salty edge and classic crisscross fork marks."
+    },
+    {
+      name: "Oatmeal Raisin Cookies",
+      description: "Hearty oats, plump raisins, and warm spices for a chewy, comforting bite."
+    },
+    {
+      name: "Snickerdoodles",
+      description: "Soft cookies rolled in cinnamon-sugar with a subtle tang from cream of tartar."
+    },
+    {
+      name: "Sugar Cookies",
+      description: "Buttery, vanilla-forward cookies with a tender crumb—perfect for decorating."
+    }
+  ]
+}
+----
+
+|===
+
+======
+
+[.include-with-Azure-OpenAI]
+======
+[source, cypher, test-skip]
+----
+WITH
+  {
+    type: 'object',
+    properties: {
+      recipes: {
+        type: 'array',
+        items: {
+          type: 'object',
+          properties: {name: {type: "string"}, description: {type: "string"}},
+          required: ["name", "description"],
+          additionalProperties: false
+        }
+      }
+    },
+    required: ['recipes'],
+    additionalProperties: false
+  } AS schema,
+  {
+    token: $azureopenaiToken,
+    resource: $azureopenaiResource,
+    model: 'gpt-5-mini'
+  } AS conf
+RETURN
+  ai.text.structuredCompletion(
+    'Hello! Can you give me a list of 5 cookie recipes, just their name and description',
+    schema,
+    'azure-openai',
+    conf
+  ) AS result
+----
+
+
+[role="queryresult",options="header",cols="1"]
+|===
+| result
+a| [source]
+----
+{
+  recipes: [
+    {
+      name: "Chocolate Chip Cookies",
+      description: "Classic chewy cookies loaded with semisweet chocolate chips and vanilla."
+    },
+    {
+      name: "Peanut Butter Cookies",
+      description: "Soft, peanut-buttery cookies with a slightly salty edge and classic crisscross fork marks."
+    },
+    {
+      name: "Oatmeal Raisin Cookies",
+      description: "Hearty oats, plump raisins, and warm spices for a chewy, comforting bite."
+    },
+    {
+      name: "Snickerdoodles",
+      description: "Soft cookies rolled in cinnamon-sugar with a subtle tang from cream of tartar."
+    },
+    {
+      name: "Sugar Cookies",
+      description: "Buttery, vanilla-forward cookies with a tender crumb—perfect for decorating."
+    }
+  ]
+}
+----
+
+|===
+======
+
+[.include-with-VertexAI]
+======
+[source, cypher, test-skip]
+----
+WITH
+  {
+    type: 'object',
+    properties: {
+      recipes: {
+        type: 'array',
+        items: {
+          type: 'object',
+          properties: {name: {type: "string"}, description: {type: "string"}},
+          required: ["name", "description"],
+          additionalProperties: false
+        }
+      }
+    },
+    required: ['recipes'],
+    additionalProperties: false
+  } AS schema,
+  {
+    apiKey: $vertexaiToken,
+    project: $vertexaiProject,
+    region: $vertexairegion,
+    model: 'gemini-2.5-flash-lite',
+    publisher: 'google'
+  } AS conf
+RETURN
+  ai.text.structuredCompletion(
+    'Hello! Can you give me a list of 5 cookie recipes, just their name and description',
+    schema,
+    'vertexai',
+    conf
+  ) AS result
+----
+
+
+[role="queryresult",options="header",cols="1"]
+|===
+| result
+a| [source]
+----
+{
+  recipes: [
+    {
+      name: "Chocolate Chip Cookies",
+      description: "Classic chewy cookies loaded with semisweet chocolate chips and vanilla."
+    },
+    {
+      name: "Peanut Butter Cookies",
+      description: "Soft, peanut-buttery cookies with a slightly salty edge and classic crisscross fork marks."
+    },
+    {
+      name: "Oatmeal Raisin Cookies",
+      description: "Hearty oats, plump raisins, and warm spices for a chewy, comforting bite."
+    },
+    {
+      name: "Snickerdoodles",
+      description: "Soft cookies rolled in cinnamon-sugar with a subtle tang from cream of tartar."
+    },
+    {
+      name: "Sugar Cookies",
+      description: "Buttery, vanilla-forward cookies with a tender crumb—perfect for decorating."
+    }
+  ]
+}
+----
+
+|===
+======
+[.include-with-Bedrock]
+======
+[source, cypher, test-skip]
+----
+WITH
+  {
+    type: 'object',
+    properties: {
+      recipes: {
+        type: 'array',
+        items: {
+          type: 'object',
+          properties: {name: {type: "string"}, description: {type: "string"}},
+          required: ["name", "description"],
+          additionalProperties: false
+        }
+      }
+    },
+    required: ['recipes'],
+    additionalProperties: false
+  } AS schema,
+  {
+    accessKeyId: $bedrockKey,
+    secretAccessKey: $bedrockSecret,
+    region: 'us-east-1',
+    model: 'amazon.nova-micro-v1:0'
+  } AS conf
+RETURN
+  ai.text.completionWithStructure(
+    'Hello! Can you give me a list of 10 cookie recipes, just their name and description',
+    schema,
+    'bedrock',
+    conf
+  ) AS result
+----
+
+
+[role="queryresult",options="header",cols="1"]
+|===
+| result
+a| [source]
+----
+{
+  recipes: [
+    {
+      name: "Chocolate Chip Cookies",
+      description: "Classic chewy cookies loaded with semisweet chocolate chips and vanilla."
+    },
+    {
+      name: "Peanut Butter Cookies",
+      description: "Soft, peanut-buttery cookies with a slightly salty edge and classic crisscross fork marks."
+    },
+    {
+      name: "Oatmeal Raisin Cookies",
+      description: "Hearty oats, plump raisins, and warm spices for a chewy, comforting bite."
+    },
+    {
+      name: "Snickerdoodles",
+      description: "Soft cookies rolled in cinnamon-sugar with a subtle tang from cream of tartar."
+    },
+    {
+      name: "Sugar Cookies",
+      description: "Buttery, vanilla-forward cookies with a tender crumb—perfect for decorating."
+    }
+  ]
+}
+----
+
+|===
+======
+====
+
+
+[[providers]]
+== Providers
+
+Structured output is supported for the `Azure OpenAI`, `Bedrock`, `OpenAI` and `Vertex AI` providers.
+Use `CALL ai.text.structuredCompletion.providers()` to see the available providers and their configuration types and defaults.
+
+For configuration details (token, model, resource, and vendor options), see:
+
+- xref:generate-text.adoc#providers-azure-openai[Generate text -> Providers -> Azure OpenAI]
+- xref:generate-text.adoc#providers-bedrock[Generate text -> Providers -> Bedrock]
+- xref:generate-text.adoc#providers-openai[Generate text -> Providers -> OpenAI]
+- xref:generate-text.adoc#providers-vertexai[Generate text -> Providers -> Vertex AI]
