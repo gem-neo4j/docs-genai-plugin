@@ -19,7 +19,7 @@ It is similar to submitting a prompt to an LLM.
 |                        `prompt`        | `STRING` | Textual prompt.
 |                        `provider`      | `STRING` | Name of the third party AI provider, see xref:#providers[Providers].
 |                        `configuration` | `MAP`    | Provider specific configuration, see xref:#providers[Providers].
-| *Returns*          3+| Generated text based on the provided prompt.
+2+| *Returns*                            | `STRING` | Generated text based on the provided prompt.
 |===
 
 

@@ -56,8 +56,7 @@ See xref:providers[] for details of each supported provider.
 Note that because this argument may contain sensitive data, it is obfuscated in the link:https://neo4j.com/docs/operations-manual/current/monitoring/logging/[query.log].
 However, if the function call is misspelled or the query is otherwise malformed, it will be logged without obfuscation.
 
-| *Returns*
-3+| Generated text based on the provided prompt.
+2+| *Returns* | `VECTOR` | The generated vector embedding for the resource.
 |===
 
 [NOTE]

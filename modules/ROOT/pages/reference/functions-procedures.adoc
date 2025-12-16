@@ -11,7 +11,7 @@
 |                        `prompt`        | `STRING` | Textual prompt.
 |                        `provider`      | `STRING` | Name of the third party AI provider, see xref:generate-text.adoc#providers[Generate text -> Providers].
 |                        `configuration` | `MAP`    | Provider specific configuration, see xref:generate-text.adoc#providers[Generate text -> Providers].
-| *Returns*          3+| Generated text based on the provided prompt.
+2+| *Returns*                            | `STRING` | Generated text based on the provided prompt.
 |===
 
 
@@ -40,7 +40,7 @@
 | `resources` | `STRING` | The object to transform into an embedding.
 | `provider`  | `STRING` | The identifier of the provider: ("VertexAI", "OpenAI", "AzureOpenAI", "Bedrock-Titan").
 | `configuration` | `MAP` | The provider specific settings.
-| *Returns* 3+| `VECTOR`
+2+| *Returns* | `VECTOR` | The generated vector embedding for the resource.
 |===
 
 
@@ -88,7 +88,7 @@
 | `resources` | `LIST<STRING>` | The object to transform into an embedding.
 | `provider` | `STRING` | The identifier of the provider: ("VertexAI", "OpenAI", "AzureOpenAI", "Bedrock").
 | `configuration` | `MAP` | The provider specific settings.
-| *Returns* 3+| `ANY`
+2+| *Returns* | `ANY` | The generated vector embedding for the resource.
 |===
 
 
