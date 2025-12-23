@@ -77,7 +77,7 @@ Storing `VECTOR` values on self-managed instances requires Enterprise Edition an
 ----
 MATCH (m:Movie {title:'Godfather, The'})
 WHERE m.plot IS NOT NULL AND m.title IS NOT NULL
-WITH m, m.title || ' ' || m.plot AS titleAndPlot // <1>
+WITH m, m.title + ' ' + m.plot AS titleAndPlot // <1>
 WITH m, ai.text.embed(titleAndPlot, 'OpenAI', { token: $openaiToken, model: 'text-embedding-3-small' }) AS vector // <2>
 SET m.embedding = vector // <3>
 RETURN m.embedding AS embedding
@@ -113,7 +113,7 @@ To run this workflow on Community Edition, you need to use link:https://github.c
 ----
 MATCH (m:Movie {title:'Godfather, The'})
 WHERE m.plot IS NOT NULL AND m.title IS NOT NULL
-WITH m, m.title || ' ' || m.plot AS titleAndPlot // <1>
+WITH m, m.title + ' ' + m.plot AS titleAndPlot // <1>
 WITH m, ai.text.embed(titleAndPlot, 'OpenAI', { token: $openaiToken, model: 'text-embedding-3-small' }) AS vector // <2>
 CALL db.create.setNodeVectorProperty(m, 'embedding', toFloatList(vector)) // <3>
 RETURN m.embedding AS embedding
@@ -201,7 +201,7 @@ Storing `VECTOR` values on an on-prem instance requires Enterprise Edition and l
 ----
 MATCH (m:Movie WHERE m.plot IS NOT NULL) LIMIT 20
 WITH collect(m) AS moviesList // <1>
-WITH moviesList, [movie IN moviesList | movie.title || ': ' || movie.plot] AS batch // <2>
+WITH moviesList, [movie IN moviesList | movie.title + ': ' + movie.plot] AS batch // <2>
 CALL ai.text.embedBatch(batch, 'OpenAI', { token: $openaiToken, model: 'text-embedding-3-small' }) YIELD index, vector
 WITH moviesList, index, vector
 MATCH (toUpdate:Movie {title: moviesList[index]['title']})
@@ -221,7 +221,7 @@ WITH collect(m) AS moviesList, // <1>
      100 AS batchSize // <2>
 UNWIND range(0, total-1, batchSize) AS batchStart // <3>
 CALL (moviesList, batchStart, batchSize) { // <4>
-    WITH [movie IN moviesList[batchStart .. batchStart + batchSize] | movie.title || ': ' || movie.plot] AS batch // <5>
+    WITH [movie IN moviesList[batchStart .. batchStart + batchSize] | movie.title + ': ' + movie.plot] AS batch // <5>
     CALL ai.text.embedBatch(batch, 'OpenAI', { token: $openaiToken, model: 'text-embedding-3-small' }) YIELD index, vector
     MATCH (toUpdate:Movie {title: moviesList[batchStart + index]['title']})
     SET toUpdate.embedding = vector // <6>
@@ -261,7 +261,7 @@ To run these workflows on Community Edition, you need to use link:https://github
 ----
 MATCH (m:Movie WHERE m.plot IS NOT NULL) LIMIT 20
 WITH collect(m) AS moviesList // <1>
-WITH moviesList, [movie IN moviesList | movie.title || ': ' || movie.plot] AS batch // <2>
+WITH moviesList, [movie IN moviesList | movie.title + ': ' + movie.plot] AS batch // <2>
 CALL ai.text.embedBatch(batch, 'OpenAI', { token: $openaiToken, model: 'text-embedding-3-small' }) YIELD index, vector
 WITH moviesList, index, vector
 CALL db.create.setNodeVectorProperty(moviesList[index], 'embedding', toFloatList(vector)) // <3>
@@ -281,7 +281,7 @@ WITH collect(m) AS moviesList, // <1>
      100 AS batchSize // <2>
 UNWIND range(0, total-1, batchSize) AS batchStart // <3>
 CALL (moviesList, batchStart, batchSize) { // <4>
-    WITH [movie IN moviesList[batchStart .. batchStart + batchSize] | movie.title || ': ' || movie.plot] AS batch // <5>
+    WITH [movie IN moviesList[batchStart .. batchStart + batchSize] | movie.title + ': ' + movie.plot] AS batch // <5>
     CALL ai.text.embedBatch(batch, 'OpenAI', { token: $openaiToken, model: 'text-embedding-3-small' }) YIELD index, vector
     CALL db.create.setNodeVectorProperty(moviesList[batchStart + index], 'embedding', toFloatList(vector)) // <6>
 } IN CONCURRENT TRANSACTIONS OF 1 ROW // <7>

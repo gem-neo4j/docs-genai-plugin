@@ -43,9 +43,9 @@ The example below selects the 5 top-rated movies, joins their titles and plots i
 ----
 MATCH (n:Movie) WHERE n.imdbRating IS NOT NULL
 ORDER BY n.imdbRating DESC LIMIT 5  // <.>
-WITH n.title || ': ' || n.plot AS movie  // <.>
+WITH n.title + ': ' + n.plot AS movie  // <.>
 WITH
-  reduce(acc = '', item IN collect(movie) | acc || item || '\n') AS movies,  // <.>
+  reduce(acc = '', item IN collect(movie) | acc + item + '\n') AS movies,  // <.>
   {
     token: $openaiToken,
     model: 'gpt-5-nano',
@@ -55,7 +55,7 @@ WITH
     }
   } AS config  // <.>
 RETURN ai.text.completion(
-    'Here is a list of movies with their titles and plots. Recommend the most child-friendly one.\n\n' || movies,  // <.>
+    'Here is a list of movies with their titles and plots. Recommend the most child-friendly one.\n\n' + movies,  // <.>
     'openai',
     config
 ) AS result
@@ -86,9 +86,9 @@ The example below selects the 5 top-rated movies, joins their titles and plots i
 ----
 MATCH (n:Movie) WHERE n.imdbRating IS NOT NULL
 ORDER BY n.imdbRating DESC LIMIT 5  // <.>
-WITH n.title || ': ' || n.plot AS movie  // <.>
+WITH n.title + ': ' + n.plot AS movie  // <.>
 WITH
-  reduce(acc = '', item IN collect(movie) | acc || item || '\n') AS movies,  // <.>
+  reduce(acc = '', item IN collect(movie) | acc + item + '\n') AS movies,  // <.>
   {
     token: $azureOpenaiToken,
     resource: '<azure-openai-resource>',
@@ -99,7 +99,7 @@ WITH
     }
   } AS config  // <.>
 RETURN ai.text.completion(
-    'Here is a list of movies with their titles and plots. Recommend the most child-friendly one.\n\n' || movies,  // <.>
+    'Here is a list of movies with their titles and plots. Recommend the most child-friendly one.\n\n' + movies,  // <.>
     'azure-openai',
     config
 ) AS result
@@ -130,9 +130,9 @@ The example below selects the 5 top-rated movies, joins their titles and plots i
 ----
 MATCH (n:Movie) WHERE n.imdbRating IS NOT NULL
 ORDER BY n.imdbRating DESC LIMIT 5  // <.>
-WITH n.title || ': ' || n.plot AS movie  // <.>
+WITH n.title + ': ' + n.plot AS movie  // <.>
 WITH
-  reduce(acc = '', item IN collect(movie) | acc || item || '\n') AS movies,  // <.>
+  reduce(acc = '', item IN collect(movie) | acc + item + '\n') AS movies,  // <.>
   {
     token: $vertexaiToken,
     model: 'gemini-2.5-flash-lite',
@@ -147,7 +147,7 @@ WITH
     }
   } AS conf  // <.>
 RETURN ai.text.completion(
-    'Here is a list of movies with their titles and plots. Recommend the most child-friendly one.\n\n' || movies,  // <.>
+    'Here is a list of movies with their titles and plots. Recommend the most child-friendly one.\n\n' + movies,  // <.>
     'vertexai',
     config
 ) AS result
@@ -182,9 +182,9 @@ The example below selects the 5 top-rated movies, joins their titles and plots i
 ----
 MATCH (n:Movie) WHERE n.imdbRating IS NOT NULL
 ORDER BY n.imdbRating DESC LIMIT 5  // <.>
-WITH n.title || ': ' || n.plot AS movie  // <.>
+WITH n.title + ': ' + n.plot AS movie  // <.>
 WITH
-  reduce(acc = '', item IN collect(movie) | acc || item || '\n') AS movies,  // <.>
+  reduce(acc = '', item IN collect(movie) | acc + item + '\n') AS movies,  // <.>
   {
     accessKeyId: $awsAccessKeyId,
     secretAccessKey: $secretAccessKey,
@@ -196,7 +196,7 @@ WITH
     }
   } AS conf  // <.>
 RETURN ai.text.completion(
-    'Here is a list of movies with their titles and plots. Recommend the most child-friendly one.\n\n' || movies,  // <.>
+    'Here is a list of movies with their titles and plots. Recommend the most child-friendly one.\n\n' + movies,  // <.>
     'bedrock-nova',
     config
 ) AS result
