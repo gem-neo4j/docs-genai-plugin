@@ -19,7 +19,7 @@ It is similar to submitting a prompt to an LLM.
 |                        `prompt`        | `STRING` | Textual prompt.
 |                        `provider`      | `STRING` | Name of the third party AI provider, see xref:#providers[Providers].
 |                        `configuration` | `MAP`    | Provider specific configuration, see xref:#providers[Providers].
-| *Returns*          3+| Generated text based on the provided prompt.
+2+| *Returns*                            | `STRING` | Generated text based on the provided prompt.
 |===
 
 == Example
@@ -42,9 +42,9 @@ The example below selects the 5 top-rated movies, joins their titles and plots i
 ----
 MATCH (n:Movie) WHERE n.imdbRating IS NOT NULL
 ORDER BY n.imdbRating DESC LIMIT 5  // <.>
-WITH n.title || ': ' || n.plot AS movie  // <.>
+WITH n.title + ': ' + n.plot AS movie  // <.>
 WITH
-  reduce(acc = '', item IN collect(movie) | acc || item || '\n') AS movies,  // <.>
+  reduce(acc = '', item IN collect(movie) | acc + item + '\n') AS movies,  // <.>
   {
     token: $openaiToken,
     model: 'gpt-5-nano',
@@ -54,7 +54,7 @@ WITH
     }
   } AS config  // <.>
 RETURN ai.text.completion(
-    'Here is a list of movies with their titles and plots. Recommend the most child-friendly one.\n\n' || movies,  // <.>
+    'Here is a list of movies with their titles and plots. Recommend the most child-friendly one.\n\n' + movies,  // <.>
     'openai',
     config
 ) AS result
@@ -85,9 +85,9 @@ The example below selects the 5 top-rated movies, joins their titles and plots i
 ----
 MATCH (n:Movie) WHERE n.imdbRating IS NOT NULL
 ORDER BY n.imdbRating DESC LIMIT 5  // <.>
-WITH n.title || ': ' || n.plot AS movie  // <.>
+WITH n.title + ': ' + n.plot AS movie  // <.>
 WITH
-  reduce(acc = '', item IN collect(movie) | acc || item || '\n') AS movies,  // <.>
+  reduce(acc = '', item IN collect(movie) | acc + item + '\n') AS movies,  // <.>
   {
     token: $azureOpenaiToken,
     resource: '<azure-openai-resource>',
@@ -98,7 +98,7 @@ WITH
     }
   } AS config  // <.>
 RETURN ai.text.completion(
-    'Here is a list of movies with their titles and plots. Recommend the most child-friendly one.\n\n' || movies,  // <.>
+    'Here is a list of movies with their titles and plots. Recommend the most child-friendly one.\n\n' + movies,  // <.>
     'azure-openai',
     config
 ) AS result
@@ -129,9 +129,9 @@ The example below selects the 5 top-rated movies, joins their titles and plots i
 ----
 MATCH (n:Movie) WHERE n.imdbRating IS NOT NULL
 ORDER BY n.imdbRating DESC LIMIT 5  // <.>
-WITH n.title || ': ' || n.plot AS movie  // <.>
+WITH n.title + ': ' + n.plot AS movie  // <.>
 WITH
-  reduce(acc = '', item IN collect(movie) | acc || item || '\n') AS movies,  // <.>
+  reduce(acc = '', item IN collect(movie) | acc + item + '\n') AS movies,  // <.>
   {
     token: $vertexaiToken,
     model: 'gemini-2.5-flash-lite',
@@ -146,7 +146,7 @@ WITH
     }
   } AS conf  // <.>
 RETURN ai.text.completion(
-    'Here is a list of movies with their titles and plots. Recommend the most child-friendly one.\n\n' || movies,  // <.>
+    'Here is a list of movies with their titles and plots. Recommend the most child-friendly one.\n\n' + movies,  // <.>
     'vertexai',
     config
 ) AS result
@@ -181,9 +181,9 @@ The example below selects the 5 top-rated movies, joins their titles and plots i
 ----
 MATCH (n:Movie) WHERE n.imdbRating IS NOT NULL
 ORDER BY n.imdbRating DESC LIMIT 5  // <.>
-WITH n.title || ': ' || n.plot AS movie  // <.>
+WITH n.title + ': ' + n.plot AS movie  // <.>
 WITH
-  reduce(acc = '', item IN collect(movie) | acc || item || '\n') AS movies,  // <.>
+  reduce(acc = '', item IN collect(movie) | acc + item + '\n') AS movies,  // <.>
   {
     accessKeyId: $awsAccessKeyId,
     secretAccessKey: $secretAccessKey,
@@ -195,7 +195,7 @@ WITH
     }
   } AS conf  // <.>
 RETURN ai.text.completion(
-    'Here is a list of movies with their titles and plots. Recommend the most child-friendly one.\n\n' || movies,  // <.>
+    'Here is a list of movies with their titles and plots. Recommend the most child-friendly one.\n\n' + movies,  // <.>
     'bedrock-nova',
     config
 ) AS result
@@ -364,6 +364,11 @@ WITH
 RETURN ai.text.completion('Yes, please reccomend a movie to me', 'openai', conf) AS result
 ----
 
+[NOTE]
+You can change OpenAI's base URL (default: https://api.openai.com) via the `genai.openai.baseurl` setting.
+The change applies to all `ai.text.*` calls that use OpenAI, including `ai.text.embed`, `ai.text.embedBatch` and `ai.text.completion`.
+See xref:reference/config.adoc#config-genai.openai.baseurl[Configuration Options -> genai.openai.baseurl].
+
 
 [[providers-azure-openai]]
 === Azure OpenAI
@@ -417,10 +422,14 @@ RETURN ai.text.completion('Yes, please recommend a movie to me', 'azure-openai',
 | `project`       | `STRING`    | -         | Google cloud project ID.
 | `region`        | `STRING`    | -         | Google cloud region (see https://cloud.google.com/vertex-ai/docs/general/locations[Vertex AI -> Locations]).
 | `publisher`     | `STRING`    | 'google'  | Model publisher.
+| `apiKey`        | `STRING`    | -         | Vertex AI API key.
 | `token`         | `STRING`    | -         | Vertex API access token.
 | `chatHistory`   | `LIST<ANY>` | `[]`      | Optional conversation history to provide context to the model. Pass a list of messages as `MAP` values with the keys `role` and `parts` where `role` is either `user` or `model` and the parts is a `LIST` containing a `MAP` with the key `text` and value representing a message. 
 | `vendorOptions` | `MAP`       | `{}`      | Optional vendor options that will be passed on as-is in the request to VertexAI (see https://cloud.google.com/vertex-ai/generative-ai/docs/reference/rest/v1/projects.locations.publishers.models/generateContent[Vertex AI -> Method: models.generateContent]).
 |===
+
+[NOTE]
+Exactly one of `apiKey` or `token` must be provided.
 
 .Usage example
 [source, cypher]

@@ -56,6 +56,20 @@ RETURN ai.text.chat.providers()
 ----
 | New procedure xref:reference/functions-procedures.adoc#ai-text-chat-providers[`ai.text.chat.providers()`] for information on the available providers for the `ai.text.chat()` function.
 See xref:generate-text.adoc#_chat_with_context[Generate text -> Chat with context].
+Support for Google VertexAI's `apiKey`
+a|
+The VertexAI provider now supports authentication via either `apiKey` or `token`.
+Applies to the following callables and their provider settings:
+
+* `ai.text.completion` — see xref:generate-text.adoc#providers-vertexai[Generate text -> Google VertexAI].
+* `ai.text.embed` and `ai.text.embedBatch` — see xref:embeddings.adoc#providers-google-vertexai[Embeddings -> Google VertexAI].
+
+
+a|
+Custom base URL for OpenAI via the `genai.openai.baseurl` setting in the `genai.conf` file.
+|
+Applies to all `ai.text.*` calls that use OpenAI, including `ai.text.embed`, `ai.text.embedBatch` and `ai.text.completion`.
+See xref:reference/config.adoc#config-genai.openai.baseurl[Configuration Options -> genai.openai.baseurl].
 
 |===
 
@@ -73,8 +87,10 @@ a|
 [source, cypher]
 ----
 RETURN ai.text.completion(prompt, provider, configuration)
+
+CALL ai.text.completion.providers() YIELD name, requiredConfigType, optionalConfigType, defaultConfig
 ----
-| New function xref:reference/functions-procedures.adoc#ai-text-completion[`ai.text.completion()`] for generating text with external AI providers.
+| New function xref:reference/functions-procedures.adoc#ai-text-completion[`ai.text.completion()`] for generating text with external AI providers and new procedure xref:reference/functions-procedures.adoc#ai-text-completion-providers[`ai.text.completion.providers()`] to display the available providers and their config setup.
 See xref:generate-text.adoc[].
 
 a|
@@ -83,8 +99,11 @@ a|
 RETURN ai.text.embed(resource, provider, configuration)
 
 CALL ai.text.embedBatch(resources, provider, configuration) YIELD index, vector
+
+CALL ai.text.embed.providers() YIELD name, requiredConfigType, optionalConfigType, defaultConfig
 ----
 | New function xref:reference/functions-procedures.adoc#ai-text-embed[`ai.text.embed`] and procedure xref:reference/functions-procedures.adoc#ai-text-embed-batch[`ai.text.embedBatch`] for generating vector embeddings.
+There is also a new procedure xref:reference/functions-procedures.adoc#ai-text-embed-providers[`ai.text.embed.providers()`] to display the available providers and their config setup.
 See xref:embeddings.adoc[].
 
 |===

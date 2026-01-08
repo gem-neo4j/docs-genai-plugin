@@ -6,4 +6,5 @@
 * *Reference*
 
 * xref:reference/functions-procedures.adoc[]
+* xref:reference/config.adoc[]
 * xref:reference/changelog.adoc[]
