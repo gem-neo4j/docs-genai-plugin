@@ -15,6 +15,34 @@ This section lists all of the features that have been removed, deprecated, added
 Cypher 25 was introduced in Neo4j 2025.06 and can only be used on Neo4j 2025.06+ databases.
 For more information, see link:{neo4j-docs-base-uri}/cypher-manual/25/queries/select-version[Cypher Manual -> Select Cypher version].
 
+[[neo4j-2025.12]]
+== Neo4j 2025.12
+
+=== Updated in Cypher 25
+
+[cols="2", options="header"]
+|===
+| Feature
+| Details
+
+a|
+Support for Google VertexAI's `apiKey`
+a|
+The VertexAI provider now supports authentication via either `apiKey` or `token`.
+Applies to the following callables and their provider settings:
+
+* `ai.text.completion` — see xref:generate-text.adoc#providers-vertexai[Generate text -> Google VertexAI].
+* `ai.text.embed` and `ai.text.embedBatch` — see xref:embeddings.adoc#providers-google-vertexai[Embeddings -> Google VertexAI].
+
+
+a|
+Custom base URL for OpenAI via the `genai.openai.baseurl` setting in the `genai.conf` file.
+|
+Applies to all `ai.text.*` calls that use OpenAI, including `ai.text.embed`, `ai.text.embedBatch` and `ai.text.completion`.
+See xref:reference/config.adoc#config-genai.openai.baseurl[Configuration Options -> genai.openai.baseurl].
+
+|===
+
 [[neo4j-2025.11]]
 == Neo4j 2025.11
 
