@@ -37,10 +37,11 @@
 |    *Description*   3+| Chat based on the specified prompt, optionally continuing a previous response.
 .5+| *Input arguments* | *Name*          | *Type*   | *Description*
 |                        `prompt`        | `STRING` | The user message to send.
-|                        `chat_id`       | `STRING` | Previous chat id to continue the conversation. If this is the first message in the conversation, set to null.
-|                        `provider`      | `STRING` | The identifier of the provider: 'Azure-OpenAI', 'OpenAI'.
+|                        `chat_id`       | `STRING` | Previous chat ID to continue the conversation. If this is the first message in the conversation, set to null.
+|                        `provider`      | `STRING` | The identifier of the provider: 'azure-openai', 'openai'.
 |                        `configuration` | `MAP`    | Provider specific configuration, use `CALL ai.text.chat.providers()` to find the configuration needed for each provider. You can specify additional vendor options by adding `vendorOptions` with a map of values that will be passed along in the request.
-| *Returns*          3+| `MAP`
+2+| *Returns*                            | `MAP` | Contains `message`, with the response text, and `chatId` for follow-up messages.
+
 |===
 
 
@@ -67,7 +68,7 @@
 | *Description* 3+a| Encode a given resource as a vector using the named provider.
 .4+| *Input arguments* | *Name* | *Type* | *Description*
 | `resources` | `STRING` | The object to transform into an embedding.
-| `provider`  | `STRING` | The identifier of the provider: ("VertexAI", "OpenAI", "AzureOpenAI", "Bedrock-Titan").
+| `provider`  | `STRING` | The identifier of the provider: ("vertexai", "openai", "azure-openai", "bedrock-titan").
 | `configuration` | `MAP` | The provider specific settings.
 2+| *Returns* | `VECTOR` | The generated vector embedding for the resource.
 |===
@@ -82,7 +83,7 @@
 | *Description* 3+a| Encode a given resource as a vector using the named provider.
 .4+| *Input arguments* | *Name* | *Type* | *Description*
 | `resources` | `LIST<STRING>` | The objects to transform into embeddings.
-| `provider` | `STRING` | The identifier of the provider: ("VertexAI", "OpenAI", "AzureOpenAI", "Bedrock-Titan").
+| `provider`  | `STRING` | The identifier of the provider: ("vertexai", "openai", "azure-openai", "bedrock-titan").
 | `configuration` | `MAP` | The provider specific settings.
 .4+| *Return arguments* | *Name* | *Type* | *Description*
 | `index` | `INTEGER` | The index of the corresponding element in the input list.
