@@ -1,12 +1,11 @@
-:description: Generate text based and chat on a textual input prompt, similar to submitting a prompt to a Large Language Model (LLM).
-:page-role:
+:description: Generate text based on a textual input prompt, similar to submitting a prompt to an Large Language Model (LLM).
+:page-role: new---2025.11
 :table-caption!:
 :test-setup-dump: https://github.com/neo4j-graph-examples/recommendations/raw/main/data/recommendations-5.26-block.dump
 
 
-= Generate text & Chat
+= Generate text
 
-[[setup]]
 == Environment setup
 
 The examples on this page use the link:https://github.com/neo4j-graph-examples/recommendations[Neo4j movie recommendations] dataset, focusing on the `plot` and `title` properties of `Movie` nodes.
@@ -17,17 +16,12 @@ image::genai-graph.svg[Example graph connecting person and actor nodes with a mo
 To recreate the graph, download and import this link:https://github.com/neo4j-graph-examples/recommendations/raw/main/data/recommendations-5.26.dump[dump file] into an empty Neo4j database.
 Dump files can be imported for both link:{neo4j-docs-base-uri}/aura/auradb/importing/import-database/[Aura] and link:{neo4j-docs-base-uri}/operations-manual/current/backup-restore/restore-dump/[self-managed] instances.
 
-
-[[generate-once]]
-[role=label--new-2025.11]
 == Generate text from prompt
 
 The function `ai.text.completion` can be used to generate text based on a textual input prompt.
 It is similar to submitting a prompt to an LLM.
 
-[NOTE]
-Use `CALL ai.text.completion.providers()` (see xref:reference/functions-procedures.adoc#ai-text-completion-providers[reference]) to see supported providers and their configuration options.
-
+[role=label--function label--new-2025.11]
 [cols="1,1,1,3"]
 .Signature for `ai.text.completion`
 |===
@@ -221,17 +215,12 @@ RETURN ai.text.completion(
 
 ====
 
-
-[[chat-with-context]]
-[role=label--new-2025.12]
 == Chat with context
 
 The function `ai.text.chat` allows you to exchange several messages with an LLM, as part of a single thread.
-
-[NOTE]
 Chats are only supported with OpenAI and Azure-OpenAI.
-Use `CALL ai.text.chat.providers()` (see xref:reference/functions-procedures.adoc#ai-text-chat-providers[reference]) to see supported providers and their configuration options.
 
+[role=label--function label--new-2025.12]
 [cols="1,1,1,3"]
 .Signature for `ai.text.chat`
 |===
@@ -239,15 +228,14 @@ Use `CALL ai.text.chat.providers()` (see xref:reference/functions-procedures.ado
 |    *Description*   3+| Chat based on the specified prompt, optionally continuing a previous interaction.
 .5+| *Inputs* | *Name* | *Type* | *Description*
 | `prompt` | `STRING` | The user message to send.
-| `chat_id` | `STRING` | Previous chat ID to continue the conversation. If this is the first message in the conversation, set it to `null`.
-| `provider` | `STRING` | The identifier of the provider: `'azure-openai'`, `'openai'`. See xref:#providers[Providers].
+| `chat_id` | `STRING` | Previous chat id to continue the conversation. If this is the first message in the conversation, set it to `null`.
+| `provider` | `STRING` | The identifier of the provider. See xref:#providers[Providers].
 | `configuration` | `MAP` | Provider-specific options. See xref:#providers[Providers].
-2+| *Returns*     | `MAP` | Contains `message`, with the response text, and `chatId` for follow-up messages.
+2+| *Returns*                            | `MAP` | Contains `message`, with the response text, and `chatId` for follow-up messages.
 |===
 
-
-[[chat-new]]
-=== Start a new chat
+.Start a new chat
+====
 
 The example below selects the 5 top-rated movies, joins their titles and plots into a single, newline-separated string, and asks the external AI provider to pick a good documentary.
 
@@ -361,9 +349,11 @@ Want more beyond this list? I can add newer options like Apollo 11 (2019) or The
 
 =====
 
+====
 
-[[chat-continue]]
-=== Continue a chat using an existing chat ID
+
+.Continue a chat using an existing chat ID
+=====
 
 The example below continues the chat from the previous example, asking for a specific category of documentaries.
 
@@ -474,8 +464,8 @@ Want streaming options or region help?",
 
 ====
 
+=====
 
-[[parallel-requests]]
 == Run multiple requests in parallel
 
 To run text completion for several prompts in parallel, you have two options:
@@ -523,6 +513,8 @@ You can generate text via the following providers:
 - Google Vertex AI (`vertexai`)
 - Amazon Bedrock Nova Models (`bedrock-nova`)
 
+Use `CALL ai.text.completion.providers()` (see xref:reference/functions-procedures.adoc#ai-text-completion-providers[reference]) to see supported providers and their configuration options in the installed version of the plugin.
+
 
 [[providers-openai]]
 === OpenAI
@@ -533,10 +525,7 @@ You can generate text via the following providers:
 | *Name*          | *Type*      | *Default* | *Description*
 | `model`         | `STRING`    | -         | Model ID (see https://platform.openai.com/docs/models[OpenAI -> Models]).
 | `token`         | `STRING`    | -         | OpenAI API key (see https://platform.openai.com/api-keys[OpenAI -> API Keys]).
-| `chatHistory`   | `LIST<ANY>` | `[]`      a| Optional conversation history to provide context to the model. Pass a list of `MAP` values with structure:
-
-- `role`: either `user` or `assistant`
-- `content`: a `STRING` representing a message
+| `chatHistory`   | `LIST<ANY>` | `[]`      | Optional conversation history to provide context to the model. Pass a list of messages as `MAP` values with the keys `role` and `content` where `role` is either `user` or `assistant` and the content is a `STRING` representing a message.
 | `vendorOptions` | `MAP`       | `{}`      | Optional vendor options that will be passed on as-is in the request to OpenAI (see https://platform.openai.com/docs/api-reference/responses/create[OpenAI -> Create a model response]).
 |===
 
@@ -581,10 +570,7 @@ See xref:reference/config.adoc#config-genai.openai.baseurl[Configuration Options
 | `model`         | `STRING`    | -         | Model ID (see https://learn.microsoft.com/en-us/azure/ai-foundry/openai/overview[Azure -> Azure OpenAI in Foundry Models]).
 | `resource`      | `STRING`    | -         | Azure resource name.
 | `token`         | `STRING`    | -         | Azure OAuth2 bearer token.
-| `chatHistory`   | `LIST<ANY>` | `[]`      a| Optional conversation history to provide context to the model. Pass a list of `MAP` values with structure:
-
-- `role`: either `user` or `assistant`
-- `content`: a `STRING` representing a message
+| `chatHistory`   | `LIST<ANY>` | `[]`      | Optional conversation history to provide context to the model. Pass a list of messages as `MAP` values with the keys `role` and `content` where `role` is either `user` or `assistant` and the content is a `STRING` representing a message.
 | `vendorOptions` | `MAP`       | `{}`      | Optional vendor options that will be passed on as-is in the request to Azure.
 |===
 
@@ -628,10 +614,7 @@ RETURN ai.text.completion('Yes, please recommend a movie to me', 'azure-openai',
 | `publisher`     | `STRING`    | 'google'  | Model publisher.
 | `apiKey`        | `STRING`    | -         | Vertex AI API key.
 | `token`         | `STRING`    | -         | Vertex API access token.
-| `chatHistory`   | `LIST<ANY>` | `[]`      a| Optional conversation history to provide context to the model. Pass a list of `MAP` values with structure:
-
-- `role`: either `user` or `assistant`
-- `parts`: a `LIST` containing a `MAP` with the key `text` and value representing a message
+| `chatHistory`   | `LIST<ANY>` | `[]`      | Optional conversation history to provide context to the model. Pass a list of messages as `MAP` values with the keys `role` and `parts` where `role` is either `user` or `model` and the parts is a `LIST` containing a `MAP` with the key `text` and value representing a message.
 | `vendorOptions` | `MAP`       | `{}`      | Optional vendor options that will be passed on as-is in the request to VertexAI (see https://cloud.google.com/vertex-ai/generative-ai/docs/reference/rest/v1/projects.locations.publishers.models/generateContent[Vertex AI -> Method: models.generateContent]).
 |===
 
@@ -683,10 +666,7 @@ This provider supports all models that use the same request parameters and respo
 | `region`          | `STRING`    | -         | Amazon region (see https://docs.aws.amazon.com/bedrock/latest/userguide/models-regions.html[Amazon Bedrock -> Model Support]).
 | `accessKeyId`     | `STRING`    | -         | Amazon access key ID.
 | `secretAccessKey` | `STRING`    | -         | Amazon secret access key.
-| `chatHistory`     | `LIST<ANY>` | `[]`     a| Optional conversation history to provide context to the model. Pass a list of `MAP` values with structure:
-
-- `role`: either `user` or `assistant`
-- `content`: a `LIST` containing a `MAP` with the key `text` and value representing a message
+| `chatHistory`     | `LIST<ANY>` | `[]`      | Optional conversation history to provide context to the model. Pass a list of messages as `MAP` values with the keys `role` and `content` where `role` is either `user` or `assistant` and the content is a `LIST` containing a `MAP` with the key `text` and value representing a message.
 | `vendorOptions`   | `MAP`       | `{}`      | Optional vendor options that will be passed on as-is in the request to Bedrock (see https://docs.aws.amazon.com/bedrock/latest/userguide/model-parameters.html[Amazon Bedrock -> Inference request parameters and response fields]).
 |===
 

@@ -29,6 +29,36 @@
 |===
 
 
+[[ai-text-chat]]
+[role=label--function label--new-2025.12 label--Cypher-25]
+== ai.text.chat()
+|===
+|    *Syntax*        3+| `ai.text.chat(prompt, chat_id, provider, configuration = {}) :: MAP`
+|    *Description*   3+| Chat based on the specified prompt, optionally continuing a previous response.
+.5+| *Input arguments* | *Name*          | *Type*   | *Description*
+|                        `prompt`        | `STRING` | The user message to send.
+|                        `chat_id`       | `STRING` | Previous chat ID to continue the conversation. If this is the first message in the conversation, set to null.
+|                        `provider`      | `STRING` | The identifier of the provider: 'azure-openai', 'openai'.
+|                        `configuration` | `MAP`    | Provider specific configuration, use `CALL ai.text.chat.providers()` to find the configuration needed for each provider. You can specify additional vendor options by adding `vendorOptions` with a map of values that will be passed along in the request.
+2+| *Returns*                            | `MAP` | Contains `message`, with the response text, and `chatId` for follow-up messages.
+
+|===
+
+
+[[ai-text-chat-providers]]
+[role=label--procedure label--new-2025.12 label--Cypher-25]
+== ai.text.chat.providers()
+|===
+|    *Syntax*         3+| `ai.text.chat.providers() :: (name, requiredConfigType, optionalConfigType, defaultConfig)`
+|    *Description*    3+| Returns chat providers and their configuration options.
+.5+| *Return arguments* | *Name*               | *Type*   | *Description*
+|                         `name`               | `STRING` | Provider name.
+|                         `requiredConfigType` | `STRING` | The signature of the required configuration options.
+|                         `optionalConfigType` | `STRING` | The signature of the optional configuration options.
+|                         `defaultConfig`      | `MAP`    | Default configuration option values.
+|===
+
+
 [[ai-text-embed]]
 [role=label--function label--new-2025.11 label--Cypher-25]
 == ai.text.embed()
@@ -38,7 +68,7 @@
 | *Description* 3+a| Encode a given resource as a vector using the named provider.
 .4+| *Input arguments* | *Name* | *Type* | *Description*
 | `resources` | `STRING` | The object to transform into an embedding.
-| `provider`  | `STRING` | The identifier of the provider: ("VertexAI", "OpenAI", "AzureOpenAI", "Bedrock-Titan").
+| `provider`  | `STRING` | The identifier of the provider: ("vertexai", "openai", "azure-openai", "bedrock-titan").
 | `configuration` | `MAP` | The provider specific settings.
 2+| *Returns* | `VECTOR` | The generated vector embedding for the resource.
 |===
@@ -53,7 +83,7 @@
 | *Description* 3+a| Encode a given resource as a vector using the named provider.
 .4+| *Input arguments* | *Name* | *Type* | *Description*
 | `resources` | `LIST<STRING>` | The objects to transform into embeddings.
-| `provider` | `STRING` | The identifier of the provider: ("VertexAI", "OpenAI", "AzureOpenAI", "Bedrock-Titan").
+| `provider`  | `STRING` | The identifier of the provider: ("vertexai", "openai", "azure-openai", "bedrock-titan").
 | `configuration` | `MAP` | The provider specific settings.
 .4+| *Return arguments* | *Name* | *Type* | *Description*
 | `index` | `INTEGER` | The index of the corresponding element in the input list.

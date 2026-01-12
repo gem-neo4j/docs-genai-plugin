@@ -26,7 +26,38 @@ For more information, see link:{neo4j-docs-base-uri}/cypher-manual/25/queries/se
 | Details
 
 a|
-Support for Google VertexAI's `apiKey`
+[source, cypher]
+----
+RETURN ai.text.completion(prompt, provider, configuration)
+----
+| The configuration for `ai.text.completion` now accepts `chatHistory`, see the specific xref:generate-text.adoc#providers[provider] details for more information.
+
+|===
+
+=== New in Cypher 25
+
+[cols="2", options="header"]
+|===
+| Feature
+| Details
+
+a|
+[source, cypher]
+----
+RETURN ai.text.chat(prompt, chatId, provider, configuration)
+----
+| New function xref:reference/functions-procedures.adoc#ai-text-chat[`ai.text.chat()`] for conversational interactions that can continue prior responses.
+See xref:generate-text.adoc#chat-with-context[Generate text -> Chat with context].
+
+a|
+[source, cypher]
+----
+RETURN ai.text.chat.providers()
+----
+| New procedure xref:reference/functions-procedures.adoc#ai-text-chat-providers[`ai.text.chat.providers()`] for information on the available providers for the `ai.text.chat()` function.
+See xref:generate-text.adoc#chat-with-context[Generate text -> Chat with context].
+
+| Support for Google VertexAI's `apiKey`
 a|
 The VertexAI provider now supports authentication via either `apiKey` or `token`.
 Applies to the following callables and their provider settings:
