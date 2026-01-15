@@ -235,11 +235,11 @@ Use `CALL ai.text.chat.providers()` (see xref:reference/functions-procedures.ado
 [cols="1,1,1,3"]
 .Signature for `ai.text.chat`
 |===
-|    *Syntax*        3+| `ai.text.chat(prompt, chat_id, provider, configuration = {}) :: MAP`
+|    *Syntax*        3+| `ai.text.chat(prompt, chatId, provider, configuration = {}) :: MAP`
 |    *Description*   3+| Chat based on the specified prompt, optionally continuing a previous interaction.
 .5+| *Inputs* | *Name* | *Type* | *Description*
 | `prompt` | `STRING` | The user message to send.
-| `chat_id` | `STRING` | Previous chat ID to continue the conversation. If this is the first message in the conversation, set it to `null`.
+| `chatId` | `STRING` | Previous chat ID to continue the conversation. If this is the first message in the conversation, set it to `null`.
 | `provider` | `STRING` | The identifier of the provider: `'azure-openai'`, `'openai'`. See xref:#providers[Providers].
 | `configuration` | `MAP` | Provider-specific options. See xref:#providers[Providers].
 2+| *Returns*     | `MAP` | Contains `message`, with the response text, and `chatId` for follow-up messages.
@@ -284,7 +284,7 @@ RETURN ai.text.chat(
 <.> Join all movies into a single, newline-separated string.
 <.> Provider specific configuration, see xref:#providers-openai[Providers -> OpenAI].
 <.> Prompt for the AI model.
-<.> Set `chat_id` to `null` to start a new conversation.
+<.> Set `chatId` to `null` to start a new conversation.
 
 [role="queryresult",options="header",cols="1"]
 |===
@@ -337,7 +337,7 @@ RETURN ai.text.chat(
 <.> Join all movies into a single, newline-separated string.
 <.> Provider specific configuration, see xref:#providers-openai[Providers -> OpenAI].
 <.> Prompt for the AI model.
-<.> Set `chat_id` to `null` to start a new conversation.
+<.> Set `chatId` to `null` to start a new conversation.
 
 [role="queryresult",options="header",cols="1"]
 |===
