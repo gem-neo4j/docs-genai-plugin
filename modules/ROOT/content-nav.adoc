@@ -2,7 +2,7 @@
 
 * xref:embeddings.adoc[]
 * xref:generate-text.adoc[]
-* xref:generate-structure-output.adoc[]
+* xref:generate-structured-output.adoc[]
 
 * *Reference*
 

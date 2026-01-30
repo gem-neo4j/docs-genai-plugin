@@ -567,8 +567,8 @@ RETURN ai.text.completion('Yes, please recommend a movie to me', 'openai', conf)
 
 [NOTE]
 You can change OpenAI's base URL (default: https://api.openai.com) via the `genai.openai.baseurl` setting.
-The change applies to all `ai.text.*` calls that use OpenAI, including `ai.text.embed`, `ai.text.embedBatch` and `ai.text.completion`.
-See xref:reference/config.adoc#config-genai.openai.baseurl[Configuration Options -> genai.openai.baseurl].
+The change applies to all `ai.text.*` calls that use OpenAI.
+See xref:reference/config.adoc#config-genai.openai.baseurl[Configuration settings -> genai.openai.baseurl].
 
 
 [[providers-azure-openai]]

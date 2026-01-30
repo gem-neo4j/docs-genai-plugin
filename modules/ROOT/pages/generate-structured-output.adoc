@@ -1,0 +1,356 @@
+:description: Generate structured output based on a textual input prompt and schema, similar to submitting a prompt to a Large Language Model (LLM).
+:page-role: new---2026.02
+:table-caption!:
+
+= Generate structured output
+
+The function `ai.text.structuredCompletion` can be used to generate structured output based on a textual input prompt and an output schema, represented as a Cypher map.
+It is similar to submitting a prompt to an LLM, but with additional guarantees that the output conforms to the requested schema.
+
+.Signature for `ai.text.structuredCompletion`
+[role=label--function label--new-2026.02]
+[cols="1,1,1,3"]
+|===
+|    *Syntax*        3+| `ai.text.structuredCompletion(prompt, schema, provider, configuration = {}) :: MAP`
+|    *Description*   3+| Generate structured output as a map based on the specified prompt and JSON schema.
+.5+| *Inputs* | *Name*          | *Type*   | *Description*
+| `prompt`        | `STRING` | The prompt to generate output from.
+| `schema`        | `MAP`    | A map describing the JSON schema for the desired output.
+| `provider`      | `STRING` | The identifier of the provider: 'Azure-OpenAI', 'Bedrock', 'OpenAI', 'VertexAI'.
+| `configuration` | `MAP`    | Provider specific configuration, use `CALL ai.text.structuredCompletion.providers()` to find the configuration needed for each provider. You can specify additional vendor options by adding `vendorOptions` with a map of values that will be passed along in the request.
+2+| *Returns*     | `MAP`    | A structured map conforming to the provided schema.
+|===
+
+
+== Examples
+
+.Cookie recipes
+=====
+The example below asks the model for cookie recipes, requesting the output as objects with properties `name`, `description`, and `tastiness`.
+
+[.tabbed-example]
+====
+[.include-with-OpenAI]
+======
+[source, cypher, test-result-skip]
+----
+WITH
+  {
+    type: 'object',
+    properties: {
+      recipes: {
+        type: 'array',
+        maxItems: 5,
+        minItems: 5,
+        items: {
+          type: 'object',
+          properties: {
+            name: {type: "string"},
+            description: {type: "string"},
+            tastiness: {type: "integer", minimum: 1, maximum: 5}
+          },
+          required: ["name", "description", "tastiness"],
+          additionalProperties: false
+        }
+      }
+    },
+    required: ['recipes'],
+    additionalProperties: false
+  } AS schema,
+  {token: $openaiToken, model: 'gpt-5-nano'} AS conf
+RETURN
+  ai.text.structuredCompletion(
+    'Hello! Produce a list of 5 cookie recipes, with their name, description, and tastiness rating.',
+    schema,
+    'openai',
+    conf
+  ) AS result
+----
+
+======
+
+[.include-with-Azure-OpenAI]
+======
+[source, cypher, test-skip]
+----
+WITH
+  {
+    type: 'object',
+    properties: {
+      recipes: {
+        type: 'array',
+        maxItems: 5,
+        minItems: 5,
+        items: {
+          type: 'object',
+          properties: {
+            name: {type: "string"},
+            description: {type: "string"},
+            tastiness: {type: "integer", minimum: 1, maximum: 5}
+          },
+          required: ["name", "description", "tastiness"],
+          additionalProperties: false
+        }
+      }
+    },
+    required: ['recipes'],
+    additionalProperties: false
+  } AS schema,
+  {
+    token: $azureopenaiToken,
+    resource: $azureopenaiResource,
+    model: 'gpt-5-mini'
+  } AS conf
+RETURN
+  ai.text.structuredCompletion(
+    'Hello! Produce a list of 5 cookie recipes, with their name, description, and tastiness rating.',
+    schema,
+    'azure-openai',
+    conf
+  ) AS result
+----
+
+======
+
+[.include-with-VertexAI]
+======
+[source, cypher, test-skip]
+----
+WITH
+  {
+    type: 'object',
+    properties: {
+      recipes: {
+        type: 'array',
+        items: {
+          type: 'object',
+          properties: {
+            name: {type: "string"},
+            description: {type: "string"}
+            tastiness: {type: "integer"}
+          },
+          required: ["name", "description", "tastiness"],
+          additionalProperties: false
+        }
+      }
+    },
+    required: ['recipes'],
+    additionalProperties: false
+  } AS schema,
+  {
+    apiKey: $vertexaiToken,
+    project: $vertexaiProject,
+    region: $vertexairegion,
+    model: 'gemini-2.5-flash-lite',
+    publisher: 'google'
+  } AS conf
+RETURN
+  ai.text.structuredCompletion(
+    'Hello! Produce a list of 5 cookie recipes, with their name, description, and tastiness rating.',
+    schema,
+    'vertexai',
+    conf
+  ) AS result
+----
+
+======
+[.include-with-Bedrock]
+======
+[source, cypher, test-skip]
+----
+WITH
+  {
+    type: 'object',
+    properties: {
+      recipes: {
+        type: 'array',
+        items: {
+          type: 'object',
+          properties: {
+            name: {type: "string"},
+            description: {type: "string"}
+            tastiness: {type: "integer"}
+          },
+          required: ["name", "description", "tastiness"],
+          additionalProperties: false
+        }
+      }
+    },
+    required: ['recipes'],
+    additionalProperties: false
+  } AS schema,
+  {
+    accessKeyId: $bedrockKey,
+    secretAccessKey: $bedrockSecret,
+    region: 'us-east-1',
+    model: 'amazon.nova-micro-v1:0'
+  } AS conf
+RETURN
+  ai.text.completionWithStructure(
+    'Hello! Produce a list of 5 cookie recipes, with their name, description, and tastiness rating.',
+    schema,
+    'bedrock',
+    conf
+  ) AS result
+----
+
+
+======
+====
+
+
+[role="queryresult",options="header",cols="1"]
+|===
+| result
+a| [source, json]
+----
+{
+  recipes: [
+    {
+      name: "Chocolate Chip Cookies",
+      description: "Classic chewy cookies loaded with semisweet chocolate chips and vanilla.",
+      tastiness: 1
+    },
+    {
+      name: "Peanut Butter Cookies",
+      description: "Soft, peanut-buttery cookies with a slightly salty edge and classic crisscross fork marks.",
+      tastiness: 3
+    },
+    {
+      name: "Oatmeal Raisin Cookies",
+      description: "Hearty oats, plump raisins, and warm spices for a chewy, comforting bite.",
+      tastiness: 5
+    },
+    {
+      name: "Snickerdoodles",
+      description: "Soft cookies rolled in cinnamon-sugar with a subtle tang from cream of tartar."
+      tastiness: 5
+    },
+    {
+      name: "Sugar Cookies",
+      description: "Buttery, vanilla-forward cookies with a tender crumb—perfect for decorating.",
+      tastiness: 3
+    }
+  ]
+}
+----
+|===
+
+=====
+
+
+[[schema-requirements]]
+== Schema requirements
+
+The `schema` argument is a Cypher map that must adhere to the JSON schema specifications of the chosen provider.
+Although most providers support standard JSON schema types (`string`, `number`, `boolean`, `object`, `array`), there are important differences in strictness and supported keywords.
+
+.Provider specifics
+[cols="1,3"]
+|===
+| Provider | Schema guidelines
+
+| **OpenAI** / **Azure-OpenAI**
+a| Uses a strict subset of JSON Schema. See the https://platform.openai.com/docs/guides/structured-outputs#supported-schemas[OpenAI docs] for more info.
+
+* All object properties must be listed as `required`.
+* All objects must specify `additionalProperties: false`.
+* Supported types include `string`, `number`, `boolean`, `integer`, `object`, `array`, `enum`, and `anyOf`.
+
+| **Vertex AI**
+a| Uses a subset of the OpenAPI 3.0 Schema Object. See the https://docs.cloud.google.com/vertex-ai/docs/reference/rest/v1/projects.locations.cachedContents#Schema[VertexAI docs] for more info.
+
+* Best suited for flat or moderately nested structures.
+* Ensure you check for specific keyword support (e.g., `nullable`).
+
+| **Bedrock**
+a| Uses the Converse API's tool definition format.
+
+* While more flexible, it is recommended to follow the OpenAPI 3.0 schema standard for maximum compatibility across different foundation models (e.g., Anthropic Claude vs. Amazon Nova).
+
+|===
+
+[NOTE]
+====
+If you provide a schema with unsupported keywords for a specific provider, the function will return an error from the provider's API. Always start with a simple schema and increase complexity incrementally.
+====
+
+
+[[providers]]
+== Providers
+
+You can generate structured output via the following providers:
+
+- OpenAI (`openai`)
+- Azure OpenAI (`azure-openai`)
+- Google Vertex AI (`vertexai`)
+- Amazon Bedrock Models (`bedrock`)
+
+
+[[providers-openai]]
+=== OpenAI
+
+.OpenAI parameters
+[opts=header, cols="1,1,1,3"]
+|===
+| *Name*          | *Type*      | *Default* | *Description*
+| `model`         | `STRING`    | -         | Model ID (see https://platform.openai.com/docs/models[OpenAI -> Models]).
+| `token`         | `STRING`    | -         | OpenAI API key (see https://platform.openai.com/api-keys[OpenAI -> API Keys]).
+| `vendorOptions` | `MAP`       | `{}`      | Optional vendor options that will be passed on as-is in the request to OpenAI (see https://platform.openai.com/docs/api-reference/responses/create[OpenAI -> Create a model response]).
+|===
+
+[NOTE]
+You can change OpenAI's base URL (default: https://api.openai.com) via the `genai.openai.baseurl` setting.
+The change applies to all `ai.text.*` calls that use OpenAI.
+See xref:reference/config.adoc#config-genai.openai.baseurl[Configuration settings -> genai.openai.baseurl].
+
+
+[[providers-azure-openai]]
+=== Azure OpenAI
+
+.Azure OpenAI parameters
+[opts=header, cols="1,1,1,3"]
+|===
+| *Name*          | *Type*      | *Default* | *Description*
+| `model`         | `STRING`    | -         | Model ID (see https://learn.microsoft.com/en-us/azure/ai-foundry/openai/overview[Azure -> Azure OpenAI in Foundry Models]).
+| `resource`      | `STRING`    | -         | Azure resource name.
+| `token`         | `STRING`    | -         | Azure OAuth2 bearer token.
+| `vendorOptions` | `MAP`       | `{}`      | Optional vendor options that will be passed on as-is in the request to Azure.
+|===
+
+
+[[providers-vertexai]]
+=== Google VertexAI
+
+.VertexAI parameters
+[opts=header, cols="1,1,1,3"]
+|===
+| *Name*          | *Type*      | *Default* | *Description*
+| `model`         | `STRING`    | -         | Model resource name (see https://console.cloud.google.com/vertex-ai/model-garden[Vertex AI -> Model Garden]).
+| `project`       | `STRING`    | -         | Google cloud project ID.
+| `region`        | `STRING`    | -         | Google cloud region (see https://cloud.google.com/vertex-ai/docs/general/locations[Vertex AI -> Locations]).
+| `publisher`     | `STRING`    | 'google'  | Model publisher.
+| `apiKey`        | `STRING`    | -         | Vertex AI API key.
+| `token`         | `STRING`    | -         | Vertex API access token.
+| `vendorOptions` | `MAP`       | `{}`      | Optional vendor options that will be passed on as-is in the request to VertexAI (see https://cloud.google.com/vertex-ai/generative-ai/docs/reference/rest/v1/projects.locations.publishers.models/generateContent[Vertex AI -> Method: models.generateContent]).
+|===
+
+[NOTE]
+Exactly one of `apiKey` or `token` must be provided.
+
+
+[[providers-bedrock]]
+=== Amazon Bedrock Models
+
+This provider supports most Bedrock models and follows the https://docs.aws.amazon.com/bedrock/latest/APIReference/API_runtime_Converse.html[Converse API].
+
+.Amazon Bedrock parameters
+[opts=header, cols="1,1,1,3"]
+|===
+| *Name*            | *Type*      | *Default* | *Description*
+| `model`           | `STRING`    | -         | Model ID or its ARN.
+| `region`          | `STRING`    | -         | Amazon region (see https://docs.aws.amazon.com/bedrock/latest/userguide/models-regions.html[Amazon Bedrock -> Model Support]).
+| `accessKeyId`     | `STRING`    | -         | Amazon access key ID.
+| `secretAccessKey` | `STRING`    | -         | Amazon secret access key.
+| `vendorOptions`   | `MAP`       | `{}`      | Optional vendor options that will be passed on as-is in the request to Bedrock (see https://docs.aws.amazon.com/bedrock/latest/userguide/model-parameters.html[Amazon Bedrock -> Inference request parameters and response fields]).
+|===
