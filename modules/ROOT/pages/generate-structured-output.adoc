@@ -5,7 +5,7 @@
 = Generate structured output
 
 The function `ai.text.structuredCompletion` can be used to generate structured output based on a textual input prompt and an output schema, represented as a Cypher map.
-It is similar to submitting a prompt to an LLM, but with additional guarantees that the output conforms to the requested schema.
+It is similar to submitting a prompt to an LLM, but with the additional guarantee that the output conforms to the requested schema.
 
 .Signature for `ai.text.structuredCompletion`
 [role=label--function label--new-2026.02]
@@ -24,6 +24,7 @@ It is similar to submitting a prompt to an LLM, but with additional guarantees t
 
 == Examples
 
+[[cookies]]
 .Cookie recipes
 =====
 The example below asks the model for cookie recipes, requesting the output as objects with properties `name`, `description`, and `tastiness`.
@@ -122,12 +123,14 @@ WITH
     properties: {
       recipes: {
         type: 'array',
+        maxItems: 5,
+        minItems: 5,
         items: {
           type: 'object',
           properties: {
             name: {type: "string"},
             description: {type: "string"}
-            tastiness: {type: "integer"}
+            tastiness: {type: "integer", minimum: 1, maximum: 5}
           },
           required: ["name", "description", "tastiness"],
           additionalProperties: false
@@ -164,12 +167,14 @@ WITH
     properties: {
       recipes: {
         type: 'array',
+        maxItems: 5,
+        minItems: 5,
         items: {
           type: 'object',
           properties: {
             name: {type: "string"},
             description: {type: "string"}
-            tastiness: {type: "integer"}
+            tastiness: {type: "integer", minimum: 1, maximum: 5}
           },
           required: ["name", "description", "tastiness"],
           additionalProperties: false
@@ -230,6 +235,431 @@ a| [source, json]
       name: "Sugar Cookies",
       description: "Buttery, vanilla-forward cookies with a tender crumb—perfect for decorating.",
       tastiness: 3
+    }
+  ]
+}
+----
+|===
+
+=====
+
+
+[[classification]]
+.Object classification
+=====
+The example below provides the model with a list of movie titles and plots, alongside a few movie genres, and asks to sort the movies into genres.
+
+[.tabbed-example]
+====
+[.include-with-OpenAI]
+======
+[source, cypher, test-result-skip]
+----
+MATCH (n:Movie)
+WHERE n.imdbRating IS NOT NULL
+ORDER BY n.imdbRating DESC
+LIMIT 50
+WITH n.title + ': ' + n.plot AS movie
+WITH
+  reduce(acc = '', item IN collect(movie) | acc + item + '\n') AS movies,
+  {
+    type: 'object',
+    properties: {
+      movies: {
+        type: 'array',
+        items: {
+          type: 'object',
+          properties: {
+            genre: {type: "string"},
+            movieTitles: {type: "array", items: {type: 'string'}}
+          },
+          required: ["genre", "movieTitles"],
+          additionalProperties: false
+        }
+      }
+    },
+    required: ['movies'],
+    additionalProperties: false
+  } AS schema,
+  {token: $openaiToken, model: 'gpt-5-nano'} AS conf
+
+RETURN
+  ai.text.structuredCompletion(
+    'Classify these films into their correct genres, using only the genres ['SciFi’, 'Horror’, 'Action’, 'Romance’, 'Drama’, 'Documentary’, 'Other’]. Films: ' + movies,
+    schema,
+    'openai',
+    conf
+  ) AS result
+----
+
+======
+
+[.include-with-Azure-OpenAI]
+======
+[source, cypher, test-skip]
+----
+MATCH (n:Movie)
+WHERE n.imdbRating IS NOT NULL
+ORDER BY n.imdbRating DESC
+LIMIT 50
+WITH n.title + ': ' + n.plot AS movie
+WITH
+  reduce(acc = '', item IN collect(movie) | acc + item + '\n') AS movies,
+  {
+    type: 'object',
+    properties: {
+      movies: {
+        type: 'array',
+        items: {
+          type: 'object',
+          properties: {
+            genre: {type: "string"},
+            movieTitles: {type: "array", items: {type: 'string'}}
+          },
+          required: ["genre", "movieTitles"],
+          additionalProperties: false
+        }
+      }
+    },
+    required: ['movies'],
+    additionalProperties: false
+  } AS schema,
+  {token: $openaiToken, model: 'gpt-5-nano'} AS conf
+
+RETURN
+  ai.text.structuredCompletion(
+    'Classify these films into their correct genres, using only the genres ['SciFi’, 'Horror’, 'Action’, 'Romance’, 'Drama’, 'Documentary’, 'Other’]. Films: ' + movies,
+    schema,
+    'azure-openai',
+    conf
+  ) AS result
+----
+
+======
+
+[.include-with-VertexAI]
+======
+[source, cypher, test-skip]
+----
+MATCH (n:Movie)
+WHERE n.imdbRating IS NOT NULL
+ORDER BY n.imdbRating DESC
+LIMIT 50
+WITH n.title + ': ' + n.plot AS movie
+WITH
+  reduce(acc = '', item IN collect(movie) | acc + item + '\n') AS movies,
+  {
+    type: 'object',
+    properties: {
+      movies: {
+        type: 'array',
+        items: {
+          type: 'object',
+          properties: {
+            genre: {type: "string"},
+            movieTitles: {type: "array", items: {type: 'string'}}
+          },
+          required: ["genre", "movieTitles"],
+          additionalProperties: false
+        }
+      }
+    },
+    required: ['movies'],
+    additionalProperties: false
+  } AS schema,
+  {token: $openaiToken, model: 'gpt-5-nano'} AS conf
+
+RETURN
+  ai.text.structuredCompletion(
+    'Classify these films into their correct genres, using only the genres ['SciFi’, 'Horror’, 'Action’, 'Romance’, 'Drama’, 'Documentary’, 'Other’]. Films: ' + movies,
+    schema,
+    'vertexai',
+    conf
+  ) AS result
+----
+
+======
+[.include-with-Bedrock]
+======
+[source, cypher, test-skip]
+----
+MATCH (n:Movie)
+WHERE n.imdbRating IS NOT NULL
+ORDER BY n.imdbRating DESC
+LIMIT 50
+WITH n.title + ': ' + n.plot AS movie
+WITH
+  reduce(acc = '', item IN collect(movie) | acc + item + '\n') AS movies,
+  {
+    type: 'object',
+    properties: {
+      movies: {
+        type: 'array',
+        items: {
+          type: 'object',
+          properties: {
+            genre: {type: "string"},
+            movieTitles: {type: "array", items: {type: 'string'}}
+          },
+          required: ["genre", "movieTitles"],
+          additionalProperties: false
+        }
+      }
+    },
+    required: ['movies'],
+    additionalProperties: false
+  } AS schema,
+  {token: $openaiToken, model: 'gpt-5-nano'} AS conf
+
+RETURN
+  ai.text.structuredCompletion(
+    'Classify these films into their correct genres, using only the genres ['SciFi’, 'Horror’, 'Action’, 'Romance’, 'Drama’, 'Documentary’, 'Other’]. Films: ' + movies,
+    schema,
+    'bedrock',
+    conf
+  ) AS result
+----
+
+======
+====
+
+
+[role="queryresult",options="header",cols="1"]
+|===
+| result
+a| [source, json]
+----
+{
+  movies: [
+    {
+      genre: "SciFi",
+      movieTitles: ["Cowboy Bebop", "Black Mirror", "Inception", "Matrix, The", "Star Wars: Episode V - The Empire Strikes Back", "Battlestar Galactica"]
+    },
+    {
+      genre: "Horror",
+      movieTitles: []
+    },
+    {
+      genre: "Action",
+      movieTitles: ["Dark Knight, The", "The Good, the Bad and the Ugly, The", "Seven Samurai (Shichinin no samurai)"]
+    },
+    {
+      genre: "Romance",
+      movieTitles: ["Pride and Prejudice"]
+    },
+    {
+      genre: "Drama",
+      movieTitles: ["Band of Brothers", "Shawshank Redemption, The", "Decalogue, The (Dekalog)", "Godfather, The", "Godfather: Part II, The", "From the Earth to the Moon", "Lord of the Rings: The Fellowship of the Ring, The", "Lord of the Rings: The Return of the King, The", "Lord of the Rings: The Two Towers, The", "Fight Club", "12 Angry Men", "Schindler's List", "Pulp Fiction", "Berlin Alexanderplatz", "Lonesome Dove", "Harakiri (Seppuku)", "Tinker, Tailor, Soldier, Spy", "Forsyte Saga, The", "Forrest Gump", "Goodfellas", "City of God (Cidade de Deus)"]
+    },
+    {
+      genre: "Documentary",
+      movieTitles: ["Civil War, The", "Cosmos", "Frozen Planet", "Making a Murderer", "George Carlin: Jammin' in New York", "The Jinx: The Life and Deaths of Robert Durst", "Bill Hicks: Revelations", "Buster Keaton: A Hard Act to Follow", "George Carlin: Back in Town", "Bill Hicks: Relentless", "George Carlin: You Are All Diseased", "George Carlin: It's Bad for Ya!", "Power of Nightmares, The", "Concert for George, The", "Generation Kill", "Louis C.K.: Shameless"]
+    },
+    {
+      genre: "Other",
+      movieTitles: ["Fawlty Towers (1975: Hotel owner Basil Fawlty's incompetence, short fuse, and arrogance form a combination that ensures accidents and trouble are never far away.", "Dr. Horrible's Sing-Along Blog", "Operation 'Y' & Other Shurik's Adventures"]
+    }
+  ]
+}
+----
+|===
+
+=====
+
+
+[[sentiment]]
+.Sentiment analysis
+=====
+The example below asks the model to classify reviews (either `positive`, `negative`, or `neutral`) and to summarize the review into a `reson`.
+
+[.tabbed-example]
+====
+[.include-with-OpenAI]
+======
+[source, cypher, test-result-skip]
+----
+WITH [
+  "Extremely well-prepared and tasty lunch with stylish presentations. The salad buffet is well-stocked with various fine pasta salads, potato salads, etc.
+The staff is friendly and the service is impeccable.",
+  "The lunch menu looked nice and the food looked good when it arrived but unfortunately was completely tasteless. Can't give anything but a one when I factor in the expensive price point."
+] AS reviewsList
+WITH
+  reduce(acc = '[', r IN reviewsList | acc + '"' + r + '"' + ', ') + ']' AS reviews,
+  {token: $openaiToken, model: 'gpt-5-nano'} AS conf,
+  {
+    type: 'object',
+    properties: {
+      sentiments: {
+        type: 'array',
+        items: {
+          type: 'object',
+          properties: {
+            sentiment: {type: "string", enum: ['positive', 'negative', 'neutral']},
+            reason: {type: "string"}
+          },
+          required: ["sentiment", "reason"],
+          additionalProperties: false
+        }
+      }
+    },
+    required: ['sentiments'],
+    additionalProperties: false
+  } AS schema
+RETURN
+  ai.text.structuredCompletion(
+    "What are the general sentiments of these restaurant reviews? " + reviews,
+    schema,
+    'openai',
+    conf
+)
+----
+
+======
+
+[.include-with-Azure-OpenAI]
+======
+[source, cypher, test-skip]
+----
+MATCH (n:Movie)
+WHERE n.imdbRating IS NOT NULL
+ORDER BY n.imdbRating DESC
+LIMIT 50
+WITH n.title + ': ' + n.plot AS movie
+WITH
+  reduce(acc = '', item IN collect(movie) | acc + item + '\n') AS movies,
+  {
+    type: 'object',
+    properties: {
+      movies: {
+        type: 'array',
+        items: {
+          type: 'object',
+          properties: {
+            genre: {type: "string"},
+            movieTitles: {type: "array", items: {type: 'string'}}
+          },
+          required: ["genre", "movieTitles"],
+          additionalProperties: false
+        }
+      }
+    },
+    required: ['movies'],
+    additionalProperties: false
+  } AS schema,
+  {token: $openaiToken, model: 'gpt-5-nano'} AS conf
+
+RETURN
+  ai.text.structuredCompletion(
+    'Classify these films into their correct genres, using only the genres ['SciFi’, 'Horror’, 'Action’, 'Romance’, 'Drama’, 'Documentary’, 'Other’]. Films: ' + movies,
+    schema,
+    'azure-openai',
+    conf
+  ) AS result
+----
+
+======
+
+[.include-with-VertexAI]
+======
+[source, cypher, test-skip]
+----
+MATCH (n:Movie)
+WHERE n.imdbRating IS NOT NULL
+ORDER BY n.imdbRating DESC
+LIMIT 50
+WITH n.title + ': ' + n.plot AS movie
+WITH
+  reduce(acc = '', item IN collect(movie) | acc + item + '\n') AS movies,
+  {
+    type: 'object',
+    properties: {
+      movies: {
+        type: 'array',
+        items: {
+          type: 'object',
+          properties: {
+            genre: {type: "string"},
+            movieTitles: {type: "array", items: {type: 'string'}}
+          },
+          required: ["genre", "movieTitles"],
+          additionalProperties: false
+        }
+      }
+    },
+    required: ['movies'],
+    additionalProperties: false
+  } AS schema,
+  {token: $openaiToken, model: 'gpt-5-nano'} AS conf
+
+RETURN
+  ai.text.structuredCompletion(
+    'Classify these films into their correct genres, using only the genres ['SciFi’, 'Horror’, 'Action’, 'Romance’, 'Drama’, 'Documentary’, 'Other’]. Films: ' + movies,
+    schema,
+    'vertexai',
+    conf
+  ) AS result
+----
+
+======
+[.include-with-Bedrock]
+======
+[source, cypher, test-skip]
+----
+MATCH (n:Movie)
+WHERE n.imdbRating IS NOT NULL
+ORDER BY n.imdbRating DESC
+LIMIT 50
+WITH n.title + ': ' + n.plot AS movie
+WITH
+  reduce(acc = '', item IN collect(movie) | acc + item + '\n') AS movies,
+  {
+    type: 'object',
+    properties: {
+      movies: {
+        type: 'array',
+        items: {
+          type: 'object',
+          properties: {
+            genre: {type: "string"},
+            movieTitles: {type: "array", items: {type: 'string'}}
+          },
+          required: ["genre", "movieTitles"],
+          additionalProperties: false
+        }
+      }
+    },
+    required: ['movies'],
+    additionalProperties: false
+  } AS schema,
+  {token: $openaiToken, model: 'gpt-5-nano'} AS conf
+
+RETURN
+  ai.text.structuredCompletion(
+    'Classify these films into their correct genres, using only the genres ['SciFi’, 'Horror’, 'Action’, 'Romance’, 'Drama’, 'Documentary’, 'Other’]. Films: ' + movies,
+    schema,
+    'bedrock',
+    conf
+  ) AS result
+----
+
+======
+====
+
+
+[role="queryresult",options="header",cols="1"]
+|===
+| result
+a| [source, json]
+----
+{
+  sentiments: [
+    {
+      reason: "Extremely well-prepared and tasty lunch with stylish presentations; well-stocked salad buffet; friendly staff and impeccable service.",
+      sentiment: "positive"
+    },
+    {
+      reason: "Lunch menu looked nice and the food appeared good, but it was completely tasteless; the expensive price point made it disappointing.",
+      sentiment: "negative"
     }
   ]
 }
