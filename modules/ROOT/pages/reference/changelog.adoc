@@ -34,6 +34,7 @@ RETURN ai.text.structuredCompletion(prompt, schema, provider, configuration)
 CALL ai.text.structuredCompletion.providers() YIELD name, requiredConfigType, optionalConfigType, defaultConfig
 ----
 | New function xref:reference/functions-procedures.adoc#ai-text-completion-with-structure[`ai.text.structuredCompletion()`] for generating structured output that conforms to a JSON schema, and new procedure xref:reference/functions-procedures.adoc#ai-text-completion-with-structure-providers[`ai.text.completionWithStructure.providers()`] to display the available providers and their config setup.
+
 See xref:generate-structured-output.adoc[].
 
 |===
