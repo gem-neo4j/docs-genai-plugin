@@ -1,7 +1,4 @@
 # tag::recipes[]
-
-[source, cypher, test-result-skip, subs="+attributes,+macros"]
-----
 WITH
   {
     type: 'object',
@@ -25,23 +22,10 @@ WITH
     required: ['recipes'],
     additionalProperties: false
   } AS schema,
-  {token: $openaiToken, model: 'gpt-5-nano'} AS conf
-RETURN
-  ai.text.structuredCompletion(
-    'Hello! Produce a list of 5 cookie recipes, with their name, description, and tastiness rating.',
-    schema,
-    '{provider}',
-    conf
-  ) AS result
-----
-
 # end::recipes[]
 
 
 # tag::classification[]
-
-[source, cypher, test-result-skip, subs="+attributes,+macros"]
-----
 MATCH (n:Movie)
 WHERE n.imdbRating IS NOT NULL
 ORDER BY n.imdbRating DESC
@@ -68,24 +52,10 @@ WITH
     required: ['movies'],
     additionalProperties: false
   } AS schema,
-  {token: $openaiToken, model: 'gpt-5-nano'} AS conf
-
-RETURN
-  ai.text.structuredCompletion(
-    'Classify these films into their correct genres, using only the genres ['SciFi’, 'Horror’, 'Action’, 'Romance’, 'Drama’, 'Documentary’, 'Other’]. Films: ' + movies,
-    schema,
-    '{provider}',
-    conf
-  ) AS result
-----
-
 # end::classification[]
 
 
 # tag::sentiment-analysis[]
-
-[source, cypher, test-result-skip, subs="+attributes,+macros"]
-----
 WITH [
   "Extremely well-prepared and tasty lunch with stylish presentations. The salad buffet is well-stocked with various fine pasta salads, potato salads, etc.
 The staff is friendly and the service is impeccable.",
@@ -112,14 +82,5 @@ WITH
     },
     required: ['sentiments'],
     additionalProperties: false
-  } AS schema
-RETURN
-  ai.text.structuredCompletion(
-    "What are the general sentiments of these restaurant reviews? " + reviews,
-    schema,
-    '{provider}',
-    conf
-)
-----
-
+  } AS schema,
 # end::sentiment-analysis[]

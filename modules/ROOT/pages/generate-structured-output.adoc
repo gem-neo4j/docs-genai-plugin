@@ -34,32 +34,90 @@ This example asks the model for cookie recipes, requesting the output as objects
 [.include-with-OpenAI]
 ======
 
-:provider: openai
+[source, cypher, test-result-skip, subs="+macros"]
+----
 include::partial$generate-structured-output.adoc[tag=recipes]
+  {
+    token: $openaiToken,
+    model: 'gpt-5-nano'
+  } AS conf
+RETURN
+  ai.text.structuredCompletion(
+    'Hello! Produce a list of 5 cookie recipes, with their name, description, and tastiness rating.',
+    schema,
+    'openai',
+    conf
+  ) AS result
+----
 
 ======
 
 [.include-with-Azure-OpenAI]
 ======
 
-:provider: azure-openai
+[source, cypher, test-result-skip, subs="+macros"]
+----
 include::partial$generate-structured-output.adoc[tag=recipes]
+  {
+    token: $azureopenaiToken,
+    resource: $azureopenaiResource,
+    model: 'gpt-5-mini'
+  } AS conf
+RETURN
+  ai.text.structuredCompletion(
+    'Hello! Produce a list of 5 cookie recipes, with their name, description, and tastiness rating.',
+    schema,
+    'azure-openai',
+    conf
+  ) AS result
+----
 
 ======
 
 [.include-with-VertexAI]
 ======
 
-:provider: vertexai
+[source, cypher, test-result-skip, subs="+macros"]
+----
 include::partial$generate-structured-output.adoc[tag=recipes]
+  {
+    apiKey: $vertexaiToken,
+    project: $vertexaiProject,
+    region: $vertexaiRegion,
+    model: 'gemini-2.5-flash-lite',
+    publisher: 'google'
+  } AS conf
+RETURN
+  ai.text.structuredCompletion(
+    'Hello! Produce a list of 5 cookie recipes, with their name, description, and tastiness rating.',
+    schema,
+    'vertexai',
+    conf
+  ) AS result
+----
 
 ======
 
 [.include-with-Bedrock]
 ======
 
-:provider: bedrock
+[source, cypher, test-result-skip, subs="+macros"]
+----
 include::partial$generate-structured-output.adoc[tag=recipes]
+  {
+    accessKeyId: $bedrockKey,
+    secretAccessKey: $bedrockSecret,
+    region: 'us-east-1',
+    model: 'amazon.nova-micro-v1:0'
+  } AS conf
+RETURN
+  ai.text.structuredCompletion(
+    'Hello! Produce a list of 5 cookie recipes, with their name, description, and tastiness rating.',
+    schema,
+    'bedrock',
+    conf
+  ) AS result
+----
 
 ======
 ====
@@ -114,32 +172,89 @@ This example provides the model with a list of movie titles and plots, alongside
 [.include-with-OpenAI]
 ======
 
-:provider: openai
-include::partial$generate-structured-output.adoc[tag=classification]
+[source, cypher, test-result-skip, subs="+macros"]
+----
+include::partial$generate-structured-output.adoc[tag=recipes]
+  {
+    token: $openaiToken,
+    model: 'gpt-5-nano'
+  } AS conf
+RETURN
+  ai.text.structuredCompletion(
+    'Classify these films into their correct genres, using only the genres ['SciFi’, 'Horror’, 'Action’, 'Romance’, 'Drama’, 'Documentary’, 'Other’]. Films: ' + movies,
+    schema,
+    'openai',
+    conf
+  ) AS result
+----
 
 ======
 
 [.include-with-Azure-OpenAI]
 ======
 
-:provider: azure-openai
-include::partial$generate-structured-output.adoc[tag=classification]
+[source, cypher, test-result-skip, subs="+macros"]
+----
+include::partial$generate-structured-output.adoc[tag=recipes]
+  {
+    token: $azureopenaiToken,
+    resource: $azureopenaiResource,
+    model: 'gpt-5-mini'
+  } AS conf
+RETURN
+  ai.text.structuredCompletion(
+    'Classify these films into their correct genres, using only the genres ['SciFi’, 'Horror’, 'Action’, 'Romance’, 'Drama’, 'Documentary’, 'Other’]. Films: ' + movies,
+    schema,
+    'azure-openai',
+    conf
+  ) AS result
+----
 
 ======
 
 [.include-with-VertexAI]
 ======
 
-:provider: vertexai
-include::partial$generate-structured-output.adoc[tag=classification]
+[source, cypher, test-result-skip, subs="+macros"]
+----
+include::partial$generate-structured-output.adoc[tag=recipes]
+  {
+    apiKey: $vertexaiToken,
+    project: $vertexaiProject,
+    region: $vertexaiRegion,
+    model: 'gemini-2.5-flash-lite',
+    publisher: 'google'
+  } AS conf
+RETURN
+  ai.text.structuredCompletion(
+    'Classify these films into their correct genres, using only the genres ['SciFi’, 'Horror’, 'Action’, 'Romance’, 'Drama’, 'Documentary’, 'Other’]. Films: ' + movies,
+    schema,
+    'vertexai',
+    conf
+  ) AS result
+----
 
 ======
 
 [.include-with-Bedrock]
 ======
 
-:provider: bedrock
-include::partial$generate-structured-output.adoc[tag=classification]
+[source, cypher, test-result-skip, subs="+macros"]
+----
+include::partial$generate-structured-output.adoc[tag=recipes]
+  {
+    accessKeyId: $bedrockKey,
+    secretAccessKey: $bedrockSecret,
+    region: 'us-east-1',
+    model: 'amazon.nova-micro-v1:0'
+  } AS conf
+RETURN
+  ai.text.structuredCompletion(
+    'Classify these films into their correct genres, using only the genres ['SciFi’, 'Horror’, 'Action’, 'Romance’, 'Drama’, 'Documentary’, 'Other’]. Films: ' + movies,
+    'bedrock',
+    conf
+  ) AS result
+----
 
 ======
 ====
@@ -198,35 +313,93 @@ This example asks the model to classify reviews (either `positive`, `negative`, 
 [.include-with-OpenAI]
 ======
 
-:provider: openai
+[source, cypher, test-result-skip, subs="+macros"]
+----
 include::partial$generate-structured-output.adoc[tag=sentiment-analysis]
+  {
+    token: $openaiToken,
+    model: 'gpt-5-nano'
+  } AS conf
+RETURN
+  ai.text.structuredCompletion(
+    'Classify these films into their correct genres, using only the genres ['SciFi’, 'Horror’, 'Action’, 'Romance’, 'Drama’, 'Documentary’, 'Other’]. Films: ' + movies,
+    schema,
+    'openai',
+    conf
+  ) AS result
+----
 
 ======
 
 [.include-with-Azure-OpenAI]
 ======
 
-:provider: azure-openai
+[source, cypher, test-result-skip, subs="+macros"]
+----
 include::partial$generate-structured-output.adoc[tag=sentiment-analysis]
+  {
+    token: $azureopenaiToken,
+    resource: $azureopenaiResource,
+    model: 'gpt-5-mini'
+  } AS conf
+RETURN
+  ai.text.structuredCompletion(
+    'Classify these films into their correct genres, using only the genres ['SciFi’, 'Horror’, 'Action’, 'Romance’, 'Drama’, 'Documentary’, 'Other’]. Films: ' + movies,
+    schema,
+    'azure-openai',
+    conf
+  ) AS result
+----
 
 ======
 
 [.include-with-VertexAI]
 ======
 
-:provider: vertexai
+[source, cypher, test-result-skip, subs="+macros"]
+----
 include::partial$generate-structured-output.adoc[tag=sentiment-analysis]
+  {
+    apiKey: $vertexaiToken,
+    project: $vertexaiProject,
+    region: $vertexaiRegion,
+    model: 'gemini-2.5-flash-lite',
+    publisher: 'google'
+  } AS conf
+RETURN
+  ai.text.structuredCompletion(
+    'Classify these films into their correct genres, using only the genres ['SciFi’, 'Horror’, 'Action’, 'Romance’, 'Drama’, 'Documentary’, 'Other’]. Films: ' + movies,
+    schema,
+    'vertexai',
+    conf
+  ) AS result
+----
 
 ======
 
 [.include-with-Bedrock]
 ======
 
-:provider: bedrock
+[source, cypher, test-result-skip, subs="+macros"]
+----
 include::partial$generate-structured-output.adoc[tag=sentiment-analysis]
+  {
+    accessKeyId: $bedrockKey,
+    secretAccessKey: $bedrockSecret,
+    region: 'us-east-1',
+    model: 'amazon.nova-micro-v1:0'
+  } AS conf
+RETURN
+  ai.text.structuredCompletion(
+    'Classify these films into their correct genres, using only the genres ['SciFi’, 'Horror’, 'Action’, 'Romance’, 'Drama’, 'Documentary’, 'Other’]. Films: ' + movies,
+    'bedrock',
+    conf
+  ) AS result
+----
 
 ======
 ====
+
 
 [role="queryresult",options="header",cols="1"]
 |===
