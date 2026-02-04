@@ -15,6 +15,30 @@ This section lists all of the features that have been removed, deprecated, added
 Cypher 25 was introduced in Neo4j 2025.06 and can only be used on Neo4j 2025.06+ databases.
 For more information, see link:{neo4j-docs-base-uri}/cypher-manual/25/queries/select-version[Cypher Manual -> Select Cypher version].
 
+
+[[neo4j-2026.02]]
+== Neo4j 2026.02
+
+=== New in Cypher 25
+
+[cols="2", options="header"]
+|===
+| Feature
+| Details
+
+a|
+[source, cypher]
+----
+RETURN ai.text.structuredCompletion(prompt, schema, provider, configuration)
+
+CALL ai.text.structuredCompletion.providers() YIELD name, requiredConfigType, optionalConfigType, defaultConfig
+----
+| New function xref:reference/functions-procedures.adoc#ai-text-completion-with-structure[`ai.text.structuredCompletion()`] for generating structured output that conforms to a JSON schema, and new procedure xref:reference/functions-procedures.adoc#ai-text-completion-with-structure-providers[`ai.text.completionWithStructure.providers()`] to display the available providers and their config setup.
+
+See xref:generate-structured-output.adoc[].
+
+|===
+
 [[neo4j-2025.12]]
 == Neo4j 2025.12
 

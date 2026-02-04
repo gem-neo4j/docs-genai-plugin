@@ -195,7 +195,7 @@ RETURN ai.text.completion(
 <.> Pick the 50 top-rated movies.
 <.> Join title and plot as `<title>: <plot>`.
 <.> Join all movies into a single, newline-separated string.
-<.> Provider specific configuration, see xref:#providers-bedrock-nova[Providers -> Amazon Bedrock Nova].
+<.> Provider specific configuration, see xref:#providers-bedrock[Providers -> Amazon Bedrock].
 <.> Prompt for the AI model.
 
 [role="queryresult",options="header",cols="1"]
@@ -556,8 +556,8 @@ RETURN ai.text.completion('Yes, please recommend a movie to me', 'openai', conf)
 
 [NOTE]
 You can change OpenAI's base URL (default: https://api.openai.com) via the `genai.openai.baseurl` setting.
-The change applies to all `ai.text.*` calls that use OpenAI, including `ai.text.embed`, `ai.text.embedBatch` and `ai.text.completion`.
-See xref:reference/config.adoc#config-genai.openai.baseurl[Configuration Options -> genai.openai.baseurl].
+The change applies to all `ai.text.*` calls that use OpenAI.
+See xref:reference/config.adoc#config-genai.openai.baseurl[Configuration settings -> genai.openai.baseurl].
 
 
 [[providers-azure-openai]]
@@ -659,6 +659,57 @@ RETURN ai.text.completion('Yes, please recommend a movie to me', 'vertexai', con
 ----
 
 
+[[providers-bedrock]]
+=== Amazon Bedrock Models
+
+This provider supports most Bedrock models and follows the https://docs.aws.amazon.com/bedrock/latest/APIReference/API_runtime_Converse.html[Converse API].
+
+.Amazon Bedrock parameters
+[opts=header, cols="1,1,1,3"]
+|===
+| *Name*            | *Type*      | *Default* | *Description*
+| `model`           | `STRING`    | -         | Model ID or its ARN.
+| `region`          | `STRING`    | -         | Amazon region (see https://docs.aws.amazon.com/bedrock/latest/userguide/models-regions.html[Amazon Bedrock -> Model Support]).
+| `accessKeyId`     | `STRING`    | -         | Amazon access key ID.
+| `secretAccessKey` | `STRING`    | -         | Amazon secret access key.
+| `chatHistory`     | `LIST<ANY>` | `[]`     a| Optional conversation history to provide context to the model. Pass a list of `MAP` values with structure:
+
+- `role`: either `user` or `assistant`
+- `content`: a `LIST` containing a `MAP` with the key `text` and value representing a message
+| `vendorOptions`   | `MAP`       | `{}`      | Optional vendor options that will be passed on as-is in the request to Bedrock (see https://docs.aws.amazon.com/bedrock/latest/userguide/model-parameters.html[Amazon Bedrock -> Inference request parameters and response fields]).
+|===
+
+.Usage example
+[source, cypher]
+----
+WITH
+  {
+    accessKeyId: $awsAccessKeyId,
+    secretAccessKey: $secretAccessKey,
+    model: 'amazon.nova-micro-v1:0',
+    region: 'eu-west-2',
+    vendorOptions: {
+      system: [{ text: 'Be short' }],
+      inferenceConfig: { maxTokens: 1024 }
+    },
+    chatHistory: [
+       {
+         role: "user",
+         content: [
+           { text: "My favorite movies are in the Fantasy or Sci-fi genre." }
+         ]
+       },
+       {
+         role: "assistant",
+         content: [
+           { text: "Nice! fantasy and sci-fi have great vibes. Want tailored recs?" }
+         ]
+       }
+    ]
+  } AS conf
+RETURN ai.text.completion('Yes, please recommend a movie to me', 'bedrock-nova', conf) AS result
+----
+
 [[providers-bedrock-nova]]
 === Amazon Bedrock Nova Models
 
@@ -713,6 +764,9 @@ RETURN ai.text.completion('Yes, please recommend a movie to me', 'bedrock-nova',
 
 [[providers-bedrock-titan]]
 === Amazon Bedrock Titan Models
+
+[NOTE]
+Amazon Bedrock Titan has been discontinued for text generation by AWS.
 
 This provider supports all models that use the same request parameters and response fields as the Titan text models.
 Configuration and usage is similar to xref:providers-bedrock-nova[Bedrock Nova Models], however, `chatHistory` is not supported.
