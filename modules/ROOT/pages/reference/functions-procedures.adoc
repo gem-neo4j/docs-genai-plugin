@@ -1,5 +1,33 @@
 = Functions and procedures
 
+[[ai-text-aggregate-completion]]
+[role=label--function label--new-2026.03 label--Cypher-25]
+== ai.text.aggregateCompletion()
+|===
+|    *Syntax*        3+| `ai.text.aggregateCompletion(value, prompt, provider, configuration = {}) :: STRING`
+|    *Description*   3+| Aggregating function that generates text from the specified prompt across grouped rows.
+.5+| *Input arguments* | *Name*          | *Type*   | *Description*
+|                        `value`         | `STRING` | The value to aggregate over.
+|                        `prompt`        | `STRING` | The prompt to generate text from.
+|                        `provider`      | `STRING` | The identifier of the provider: 'Azure-OpenAI', 'Bedrock', 'Bedrock-Nova', 'Bedrock-Titan', 'OpenAI', 'VertexAI'.
+|                        `configuration` | `MAP`    | Provider specific configuration, use `CALL ai.text.completion.providers()` to find the configuration needed for each provider. You can specify additional vendor options by adding `vendorOptions` with a map of values that will be passed along in the request.
+2+| *Returns*                            | `STRING` | Generated text based on the provided prompt.
+|===
+
+[[ai-text-aggregate-structured-completion]]
+[role=label--function label--new-2026.03 label--Cypher-25]
+== ai.text.aggregateStructuredCompletion()
+|===
+|    *Syntax*        3+| `ai.text.aggregateStructuredCompletion(value, prompt, schema, provider, configuration = {}) :: MAP`
+|    *Description*   3+| Aggregating function that generates a structured map based on the specified prompt and JSON schema across grouped rows.
+.6+| *Input arguments* | *Name*          | *Type*   | *Description*
+|                        `value`         | `STRING` | The value to aggregate over.
+|                        `prompt`        | `STRING` | The prompt to generate text from.
+|                        `schema`        | `MAP`    | A map describing the JSON schema for the desired output.
+|                        `provider`      | `STRING` | The identifier of the provider: 'Azure-OpenAI', 'Bedrock', 'Bedrock-Nova', 'Bedrock-Titan', 'OpenAI', 'VertexAI'.
+|                        `configuration` | `MAP`    | Provider specific configuration, use `CALL ai.text.completion.providers()` to find the configuration needed for each provider. You can specify additional vendor options by adding `vendorOptions` with a map of values that will be passed along in the request.
+2+| *Returns*                            | `MAP`    | A structured map conforming to the provided schema.
+|===
 
 [[ai-text-completion]]
 [role=label--function label--new-2025.11 label--Cypher-25]

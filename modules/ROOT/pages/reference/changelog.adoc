@@ -16,6 +16,27 @@ Cypher 25 was introduced in Neo4j 2025.06 and can only be used on Neo4j 2025.06+
 For more information, see link:{neo4j-docs-base-uri}/cypher-manual/25/queries/select-version[Cypher Manual -> Select Cypher version].
 
 
+[[neo4j-2026.03]]
+== Neo4j 2026.03
+
+=== New in Cypher 25
+
+[cols="2", options="header"]
+|===
+| Feature
+| Details
+a|
+[source, cypher]
+----
+RETURN ai.text.aggregateCompletion(value, prompt, provider, configuration)
+
+RETURN ai.text.aggregateStructuredCompletion(value, prompt, schema, provider, configuration)
+----
+| New aggregating functions xref:reference/functions-procedures.adoc#ai-text-aggregate-completion[`ai.text.aggregateCompletion()`] and xref:reference/functions-procedures.adoc#ai-text-aggregate-structured-completion[`ai.text.aggregateStructuredCompletion()`] to generate a single free-form or structured result per group.
+See xref:aggregate-text.adoc[].
+
+|===
+
 [[neo4j-2026.02]]
 == Neo4j 2026.02
 
