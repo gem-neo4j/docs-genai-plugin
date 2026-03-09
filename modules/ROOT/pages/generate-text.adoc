@@ -136,7 +136,7 @@ WITH
     vendorOptions: {
       systemInstruction: 'Be short.'
     }
-  } AS conf  // <.>
+  } AS config  // <.>
 RETURN ai.text.completion(
   'Here is a list of movies with their titles and plots. Recommend the most child-friendly one.\n\n' + movies,  // <.>
   'vertexai',
@@ -184,7 +184,7 @@ WITH
     vendorOptions: {
       system: [{ text: 'Be short' }]
     }
-  } AS conf  // <.>
+  } AS config  // <.>
 RETURN ai.text.completion(
   'Here is a list of movies with their titles and plots. Recommend the most child-friendly one.\n\n' + movies,  // <.>
   'bedrock-nova',
@@ -317,7 +317,7 @@ RETURN ai.text.chat(
   'Here is a list of movies with their titles and plots. I like space documentaries. Any recommendations?\n\n' + movies, // <.>
   null,  // <.>
   'azure-openai',
-  conf
+  config
 ) AS result
 ----
 
@@ -537,7 +537,6 @@ WITH
     token: $openaiToken,
     model: 'gpt-5-nano',
     vendorOptions: {
-      max_output_tokens: 1024,
       instructions: 'Be short.'
     },
     chatHistory: [
@@ -586,7 +585,6 @@ WITH
     resource: 'my-azure-openai-resource',
     model: 'gpt-5-nano',
     vendorOptions: {
-      max_output_tokens: 1024,
       instructions: 'Be short.'
     },
     chatHistory: [
