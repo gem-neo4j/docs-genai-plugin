@@ -439,6 +439,7 @@ WITH
 RETURN
   ai.text.structuredCompletion(
     'Classify these films into their correct genres, using only the genres [SciFi, Horror, Action, Romance, Drama, Documentary, Other]. Films: ' + movies,
+    schema,
     'bedrock',
     conf
   ) AS result
