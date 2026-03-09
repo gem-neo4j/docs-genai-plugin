@@ -511,7 +511,6 @@ The staff is friendly and the service is impeccable.",
 ] AS reviewsList
 WITH
   reduce(acc = '[', r IN reviewsList | acc + '"' + r + '"' + ', ') + ']' AS reviews,
-  {token: $openaiToken, model: 'gpt-5-nano'} AS conf,
   {
     type: 'object',
     properties: {
@@ -558,7 +557,6 @@ The staff is friendly and the service is impeccable.",
 ] AS reviewsList
 WITH
   reduce(acc = '[', r IN reviewsList | acc + '"' + r + '"' + ', ') + ']' AS reviews,
-  {token: $openaiToken, model: 'gpt-5-nano'} AS conf,
   {
     type: 'object',
     properties: {
@@ -606,7 +604,6 @@ The staff is friendly and the service is impeccable.",
 ] AS reviewsList
 WITH
   reduce(acc = '[', r IN reviewsList | acc + '"' + r + '"' + ', ') + ']' AS reviews,
-  {token: $openaiToken, model: 'gpt-5-nano'} AS conf,
   {
     type: 'object',
     properties: {
@@ -656,7 +653,6 @@ The staff is friendly and the service is impeccable.",
 ] AS reviewsList
 WITH
   reduce(acc = '[', r IN reviewsList | acc + '"' + r + '"' + ', ') + ']' AS reviews,
-  {token: $openaiToken, model: 'gpt-5-nano'} AS conf,
   {
     type: 'object',
     properties: {
