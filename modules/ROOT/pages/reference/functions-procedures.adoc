@@ -196,6 +196,36 @@ For usage examples, see xref:embeddings.adoc#multiple-embeddings[Generate and st
 For provider details and examples, see xref:embeddings.adoc#providers[Embeddings -> Providers].
 
 
+[[ai-text-token-count]]
+[role=label--function label--new-2026.04 label--Cypher-25]
+== ai.text.tokenCount()
+
+|===
+|    *Syntax*        3+| `ai.text.tokenCount(input, provider, configuration = {}) :: INTEGER`
+|    *Description*   3+| Generate token count for the specified input.
+.4+| *Input arguments* | *Name*          | *Type*   | *Description*
+|                        `input`         | `STRING` | The input to generate token count for.
+|                        `provider`      | `STRING` | The identifier of the provider: 'Bedrock', 'OpenAI', 'VertexAI'. The default is 'OpenAI'.
+|                        `configuration` | `MAP`    | Provider specific configuration, use `CALL ai.text.tokenCount.providers()` to find the configuration needed for each provider. You can specify additional vendor options by adding `vendorOptions` with a map of values that will be passed along in the request.
+2+| *Returns*                            | `INTEGER` | The number of tokens in the input.
+|===
+
+
+[[ai-text-token-count-providers]]
+[role=label--procedure label--new-2026.04 label--Cypher-25]
+== ai.text.tokenCount.providers()
+
+|===
+|    *Syntax*         3+| `ai.text.tokenCount.providers() :: (name, requiredConfigType, optionalConfigType, defaultConfig)`
+|    *Description*    3+| Lists the available token count providers and their configuration options.
+.5+| *Return arguments* | *Name*               | *Type*   | *Description*
+|                         `name`               | `STRING` | Provider name.
+|                         `requiredConfigType` | `STRING` | The signature of the required config map.
+|                         `optionalConfigType` | `STRING` | The signature of the optional config map.
+|                         `defaultConfig`      | `MAP`    | The default values for the GenAI provider.
+|===
+
+
 [[genai-vector-encode]]
 [role=label--function label--deprecated-Cypher-25]
 == genai.vector.encode()

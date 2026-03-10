@@ -3,6 +3,7 @@
 * xref:embeddings.adoc[]
 * xref:generate-text.adoc[]
 * xref:generate-structured-output.adoc[]
+* xref:count-tokens.adoc[]
 
 * *Reference*
 
