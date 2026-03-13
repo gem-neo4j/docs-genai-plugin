@@ -33,7 +33,6 @@ RETURN ai.text.aggregateCompletion(value, prompt, provider, configuration)
 RETURN ai.text.aggregateStructuredCompletion(value, prompt, schema, provider, configuration)
 ----
 | New aggregating functions xref:reference/functions-procedures.adoc#ai-text-aggregate-completion[`ai.text.aggregateCompletion()`] and xref:reference/functions-procedures.adoc#ai-text-aggregate-structured-completion[`ai.text.aggregateStructuredCompletion()`] to generate a single free-form or structured result per group.
-See xref:aggregate-text.adoc[].
 
 |===
 

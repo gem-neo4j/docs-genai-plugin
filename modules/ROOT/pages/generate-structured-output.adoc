@@ -1,11 +1,14 @@
 :description: Generate structured output based on a textual input prompt and schema, similar to submitting a prompt to a Large Language Model (LLM).
-:page-role: new---2026.02
 :table-caption!:
 
 = Generate structured output
 
-The function `ai.text.structuredCompletion` can be used to generate structured output based on a textual input prompt and an output schema, represented as a Cypher map.
+The functions `ai.text.structuredCompletion` and `ai.text.aggregateStructuredCompletion` can be used to generate structured output based on a textual input prompt and an output schema, represented as a Cypher map.
 It is similar to submitting a prompt to an LLM, but with the additional guarantee that the output conforms to the requested schema.
+
+
+[role=label--new-2026.02]
+== Generate structured output for a single value
 
 .Signature for `ai.text.structuredCompletion`
 [role=label--function label--new-2026.02]
@@ -20,9 +23,6 @@ It is similar to submitting a prompt to an LLM, but with the additional guarante
 | `configuration` | `MAP`    | Provider specific configuration, use `CALL ai.text.structuredCompletion.providers()` to find the configuration needed for each provider. You can specify additional vendor options by adding `vendorOptions` with a map of values that will be passed along in the request.
 2+| *Returns*     | `MAP`    | A structured map conforming to the provided schema.
 |===
-
-
-== Examples
 
 [[cookies]]
 .Cookie recipes
@@ -712,6 +712,193 @@ a| [source, json]
 |===
 
 =====
+
+
+[role=label--new-2026.03]
+[[aggregate-structured]]
+== Generate structured output for multiple values
+
+[role=label--function label--new-2026.03]
+[cols="1,1,1,3"]
+.Signature for `ai.text.aggregateStructuredCompletion`
+|===
+|    *Syntax*        3+| `ai.text.aggregateStructuredCompletion(value, prompt, schema, provider, configuration = {}) :: MAP`
+|    *Description*   3+| Aggregating function that generates a structured map based on the specified prompt and JSON schema across grouped rows.
+.6+| *Input arguments* | *Name*          | *Type*   | *Description*
+|                        `value`         | `STRING` | The value to aggregate over.
+|                        `prompt`        | `STRING` | The prompt to generate text from.
+|                        `schema`        | `MAP`    | A map describing the JSON schema for the desired output.
+|                        `provider`      | `STRING` | The identifier of the provider: 'Azure-OpenAI', 'Bedrock', 'Bedrock-Nova', 'Bedrock-Titan', 'OpenAI', 'VertexAI'.
+|                        `configuration` | `MAP`    | Provider specific configuration, use `CALL ai.text.completion.providers()` to find the configuration needed for each provider. You can specify additional vendor options by adding `vendorOptions` with a map of values that will be passed along in the request.
+2+| *Returns*                            | `MAP`    | A structured map conforming to the provided schema.
+|===
+
+[.tabbed-example]
+====
+[.include-with-OpenAI]
+======
+
+The following example aggregates reviews and asks the external AI provider to extract from them the common pain points and desired features.
+The result is requested as a `MAP` listing the pain points and requested features, as well as optionally listing the sentiment of the review.
+
+[source, cypher]
+----
+MATCH (r:Review)
+WITH r, {
+    token: $openaiToken,
+    model: 'gpt-5-nano'
+  } AS config
+RETURN ai.text.aggregateStructuredCompletion(
+         r.comment,
+         'Extract common pain points and desired features from these reviews.',
+         {
+           type: 'object',
+           properties: {
+             painPoints: { type: 'array', items: { type: 'string' } },
+             requestedFeatures: { type: 'array', items: { type: 'string' } },
+             sentiment: { type: 'string', enum: ['negative','neutral','positive'] }
+           },
+           required: ['painPoints','requestedFeatures']
+         },
+         'openai',
+         config
+       ) AS review_insights;
+----
+
+[role="queryresult",options="header",cols="1"]
+|===
+| review_insights
+| {painPoints: ["slow performance", "confusing menus"], requestedFeatures: ["favorites", "export to CSV"], sentiment: "negative"}
+|===
+
+======
+
+[.include-with-Azure-OpenAI]
+======
+
+The following example aggregates reviews and asks the external AI provider to extract from them the common pain points and desired features.
+The result is requested as a `MAP` listing the pain points and requested features, as well as optionally listing the sentiment of the review.
+
+[source, cypher]
+----
+MATCH (r:Review)
+WITH r, {
+    token: $azureOpenaiToken,
+    resource: '<azure-openai-resource>',
+    model: 'gpt-5-nano'
+  } AS config
+RETURN ai.text.aggregateStructuredCompletion(
+         r.comment,
+         'Extract common pain points and desired features from these reviews.',
+         {
+           type: 'object',
+           properties: {
+             painPoints: { type: 'array', items: { type: 'string' } },
+             requestedFeatures: { type: 'array', items: { type: 'string' } },
+             sentiment: { type: 'string', enum: ['negative','neutral','positive'] }
+           },
+           required: ['painPoints','requestedFeatures']
+         },
+         'azure-openai',
+         config
+       ) AS review_insights;
+----
+
+[role="queryresult",options="header",cols="1"]
+|===
+| review_insights
+| {painPoints: ["onboarding takes too long"], requestedFeatures: ["SAML SSO", "custom dashboards"], sentiment: "neutral"}
+|===
+
+======
+
+[.include-with-VertexAI]
+======
+
+The following example aggregates reviews and asks the external AI provider to extract from them the common pain points and desired features.
+The result is requested as a `MAP` listing the pain points and requested features, as well as optionally listing the sentiment of the review.
+
+[source, cypher]
+----
+MATCH (r:Review)
+WITH r, {
+    token: $vertexaiToken,
+    model: 'gemini-2.5-flash-lite',
+    publisher: 'google',
+    project: '<google-cloud-project>',
+    region: '<gcp-region>'
+  } AS conf
+RETURN ai.text.aggregateStructuredCompletion(
+         r.comment,
+         'Extract common pain points and desired features from these reviews.',
+         {
+           type: 'object',
+           properties: {
+             painPoints: { type: 'array', items: { type: 'string' } },
+             requestedFeatures: { type: 'array', items: { type: 'string' } },
+             sentiment: { type: 'string', enum: ['negative','neutral','positive'] }
+           },
+           required: ['painPoints','requestedFeatures']
+         },
+         'vertexai',
+         conf
+       ) AS review_insights;
+----
+
+[role="queryresult",options="header",cols="1"]
+|===
+| review_insights
+| {painPoints: ["sync issues"], requestedFeatures: ["multi-device drafts"], sentiment: "positive"}
+|===
+
+======
+
+[.include-with-Bedrock]
+======
+
+The following example aggregates reviews and asks the external AI provider to extract from them the common pain points and desired features.
+The result is requested as a `MAP` listing the pain points and requested features, as well as optionally listing the sentiment of the review.
+
+[source, cypher]
+----
+MATCH (r:Review)
+WITH r, {
+    accessKeyId: $awsAccessKeyId,
+    secretAccessKey: $secretAccessKey,
+    model: 'amazon.nova-micro-v1:0',
+    region: '<aws-region>'
+  } AS conf
+RETURN ai.text.aggregateStructuredCompletion(
+         r.comment,
+         'Extract common pain points and desired features from these reviews.',
+         {
+           type: 'object',
+           properties: {
+             painPoints: { type: 'array', items: { type: 'string' } },
+             requestedFeatures: { type: 'array', items: { type: 'string' } },
+             sentiment: { type: 'string', enum: ['negative','neutral','positive'] }
+           },
+           required: ['painPoints','requestedFeatures']
+         },
+         'bedrock-nova',
+         conf
+       ) AS review_insights;
+----
+
+[role="queryresult",options="header",cols="1"]
+|===
+| review_insights
+| {painPoints: ["pricing confusion"], requestedFeatures: ["annual billing"], sentiment: "neutral"}
+|===
+
+======
+====
+
+[IMPORTANT]
+Use grouping keys appropriately: everything not aggregated must be included in the `RETURN` grouping.
+
+[TIP]
+Aggregations can involve many rows per group, so start with concise prompts and iterate.
 
 
 [[schema-requirements]]
