@@ -34,9 +34,31 @@ This example asks the model for cookie recipes, requesting the output as objects
 [.include-with-OpenAI]
 ======
 
-[source, cypher, test-result-skip, subs="+macros"]
+[source, cypher, test-result-skip]
 ----
-include::partial$generate-structured-output.adoc[tag=recipes]
+WITH
+  {
+    type: 'object',
+    properties: {
+      recipes: {
+        type: 'array',
+        maxItems: 5,
+        minItems: 5,
+        items: {
+          type: 'object',
+          properties: {
+            name: {type: "string"},
+            description: {type: "string"},
+            tastiness: {type: "integer", minimum: 1, maximum: 5}
+          },
+          required: ["name", "description", "tastiness"],
+          additionalProperties: false
+        }
+      }
+    },
+    required: ['recipes'],
+    additionalProperties: false
+  } AS schema,
   {
     token: $openaiToken,
     model: 'gpt-5-nano'
@@ -55,9 +77,31 @@ RETURN
 [.include-with-Azure-OpenAI]
 ======
 
-[source, cypher, test-result-skip, subs="+macros"]
+[source, cypher, test-result-skip]
 ----
-include::partial$generate-structured-output.adoc[tag=recipes]
+WITH
+  {
+    type: 'object',
+    properties: {
+      recipes: {
+        type: 'array',
+        maxItems: 5,
+        minItems: 5,
+        items: {
+          type: 'object',
+          properties: {
+            name: {type: "string"},
+            description: {type: "string"},
+            tastiness: {type: "integer", minimum: 1, maximum: 5}
+          },
+          required: ["name", "description", "tastiness"],
+          additionalProperties: false
+        }
+      }
+    },
+    required: ['recipes'],
+    additionalProperties: false
+  } AS schema,
   {
     token: $azureopenaiToken,
     resource: $azureopenaiResource,
@@ -77,9 +121,31 @@ RETURN
 [.include-with-VertexAI]
 ======
 
-[source, cypher, test-result-skip, subs="+macros"]
+[source, cypher, test-result-skip]
 ----
-include::partial$generate-structured-output.adoc[tag=recipes]
+WITH
+  {
+    type: 'object',
+    properties: {
+      recipes: {
+        type: 'array',
+        maxItems: 5,
+        minItems: 5,
+        items: {
+          type: 'object',
+          properties: {
+            name: {type: "string"},
+            description: {type: "string"},
+            tastiness: {type: "integer", minimum: 1, maximum: 5}
+          },
+          required: ["name", "description", "tastiness"],
+          additionalProperties: false
+        }
+      }
+    },
+    required: ['recipes'],
+    additionalProperties: false
+  } AS schema,
   {
     apiKey: $vertexaiToken,
     project: $vertexaiProject,
@@ -101,9 +167,31 @@ RETURN
 [.include-with-Bedrock]
 ======
 
-[source, cypher, test-result-skip, subs="+macros"]
+[source, cypher, test-result-skip]
 ----
-include::partial$generate-structured-output.adoc[tag=recipes]
+WITH
+  {
+    type: 'object',
+    properties: {
+      recipes: {
+        type: 'array',
+        maxItems: 5,
+        minItems: 5,
+        items: {
+          type: 'object',
+          properties: {
+            name: {type: "string"},
+            description: {type: "string"},
+            tastiness: {type: "integer", minimum: 1, maximum: 5}
+          },
+          required: ["name", "description", "tastiness"],
+          additionalProperties: false
+        }
+      }
+    },
+    required: ['recipes'],
+    additionalProperties: false
+  } AS schema,
   {
     accessKeyId: $bedrockKey,
     secretAccessKey: $bedrockSecret,
@@ -172,16 +260,41 @@ This example provides the model with a list of movie titles and plots, alongside
 [.include-with-OpenAI]
 ======
 
-[source, cypher, test-result-skip, subs="+macros"]
+[source, cypher, test-result-skip]
 ----
-include::partial$generate-structured-output.adoc[tag=recipes]
+MATCH (n:Movie)
+WHERE n.imdbRating IS NOT NULL
+ORDER BY n.imdbRating DESC
+LIMIT 50
+WITH n.title + ': ' + n.plot AS movie
+WITH
+  reduce(acc = '', item IN collect(movie) | acc + item + '\n') AS movies,
+  {
+    type: 'object',
+    properties: {
+      movies: {
+        type: 'array',
+        items: {
+          type: 'object',
+          properties: {
+            genre: {type: "string"},
+            movieTitles: {type: "array", items: {type: 'string'}}
+          },
+          required: ["genre", "movieTitles"],
+          additionalProperties: false
+        }
+      }
+    },
+    required: ['movies'],
+    additionalProperties: false
+  } AS schema,
   {
     token: $openaiToken,
     model: 'gpt-5-nano'
   } AS conf
 RETURN
   ai.text.structuredCompletion(
-    'Classify these films into their correct genres, using only the genres ['SciFi’, 'Horror’, 'Action’, 'Romance’, 'Drama’, 'Documentary’, 'Other’]. Films: ' + movies,
+    'Classify these films into their correct genres, using only the genres [SciFi, Horror, Action, Romance, Drama, Documentary, Other]. Films: ' + movies,
     schema,
     'openai',
     conf
@@ -193,9 +306,34 @@ RETURN
 [.include-with-Azure-OpenAI]
 ======
 
-[source, cypher, test-result-skip, subs="+macros"]
+[source, cypher, test-result-skip]
 ----
-include::partial$generate-structured-output.adoc[tag=recipes]
+MATCH (n:Movie)
+WHERE n.imdbRating IS NOT NULL
+ORDER BY n.imdbRating DESC
+LIMIT 50
+WITH n.title + ': ' + n.plot AS movie
+WITH
+  reduce(acc = '', item IN collect(movie) | acc + item + '\n') AS movies,
+  {
+    type: 'object',
+    properties: {
+      movies: {
+        type: 'array',
+        items: {
+          type: 'object',
+          properties: {
+            genre: {type: "string"},
+            movieTitles: {type: "array", items: {type: 'string'}}
+          },
+          required: ["genre", "movieTitles"],
+          additionalProperties: false
+        }
+      }
+    },
+    required: ['movies'],
+    additionalProperties: false
+  } AS schema,
   {
     token: $azureopenaiToken,
     resource: $azureopenaiResource,
@@ -203,7 +341,7 @@ include::partial$generate-structured-output.adoc[tag=recipes]
   } AS conf
 RETURN
   ai.text.structuredCompletion(
-    'Classify these films into their correct genres, using only the genres ['SciFi’, 'Horror’, 'Action’, 'Romance’, 'Drama’, 'Documentary’, 'Other’]. Films: ' + movies,
+    'Classify these films into their correct genres, using only the genres [SciFi, Horror, Action, Romance, Drama, Documentary, Other]. Films: ' + movies,
     schema,
     'azure-openai',
     conf
@@ -215,9 +353,34 @@ RETURN
 [.include-with-VertexAI]
 ======
 
-[source, cypher, test-result-skip, subs="+macros"]
+[source, cypher, test-result-skip]
 ----
-include::partial$generate-structured-output.adoc[tag=recipes]
+MATCH (n:Movie)
+WHERE n.imdbRating IS NOT NULL
+ORDER BY n.imdbRating DESC
+LIMIT 50
+WITH n.title + ': ' + n.plot AS movie
+WITH
+  reduce(acc = '', item IN collect(movie) | acc + item + '\n') AS movies,
+  {
+    type: 'object',
+    properties: {
+      movies: {
+        type: 'array',
+        items: {
+          type: 'object',
+          properties: {
+            genre: {type: "string"},
+            movieTitles: {type: "array", items: {type: 'string'}}
+          },
+          required: ["genre", "movieTitles"],
+          additionalProperties: false
+        }
+      }
+    },
+    required: ['movies'],
+    additionalProperties: false
+  } AS schema,
   {
     apiKey: $vertexaiToken,
     project: $vertexaiProject,
@@ -227,7 +390,7 @@ include::partial$generate-structured-output.adoc[tag=recipes]
   } AS conf
 RETURN
   ai.text.structuredCompletion(
-    'Classify these films into their correct genres, using only the genres ['SciFi’, 'Horror’, 'Action’, 'Romance’, 'Drama’, 'Documentary’, 'Other’]. Films: ' + movies,
+    'Classify these films into their correct genres, using only the genres [SciFi, Horror, Action, Romance, Drama, Documentary, Other]. Films: ' + movies,
     schema,
     'vertexai',
     conf
@@ -239,9 +402,34 @@ RETURN
 [.include-with-Bedrock]
 ======
 
-[source, cypher, test-result-skip, subs="+macros"]
+[source, cypher, test-result-skip]
 ----
-include::partial$generate-structured-output.adoc[tag=recipes]
+MATCH (n:Movie)
+WHERE n.imdbRating IS NOT NULL
+ORDER BY n.imdbRating DESC
+LIMIT 50
+WITH n.title + ': ' + n.plot AS movie
+WITH
+  reduce(acc = '', item IN collect(movie) | acc + item + '\n') AS movies,
+  {
+    type: 'object',
+    properties: {
+      movies: {
+        type: 'array',
+        items: {
+          type: 'object',
+          properties: {
+            genre: {type: "string"},
+            movieTitles: {type: "array", items: {type: 'string'}}
+          },
+          required: ["genre", "movieTitles"],
+          additionalProperties: false
+        }
+      }
+    },
+    required: ['movies'],
+    additionalProperties: false
+  } AS schema,
   {
     accessKeyId: $bedrockKey,
     secretAccessKey: $bedrockSecret,
@@ -250,7 +438,8 @@ include::partial$generate-structured-output.adoc[tag=recipes]
   } AS conf
 RETURN
   ai.text.structuredCompletion(
-    'Classify these films into their correct genres, using only the genres ['SciFi’, 'Horror’, 'Action’, 'Romance’, 'Drama’, 'Documentary’, 'Other’]. Films: ' + movies,
+    'Classify these films into their correct genres, using only the genres [SciFi, Horror, Action, Romance, Drama, Documentary, Other]. Films: ' + movies,
+    schema,
     'bedrock',
     conf
   ) AS result
@@ -313,20 +502,45 @@ This example asks the model to classify reviews (either `positive`, `negative`, 
 [.include-with-OpenAI]
 ======
 
-[source, cypher, test-result-skip, subs="+macros"]
+[source, cypher, test-result-skip]
 ----
-include::partial$generate-structured-output.adoc[tag=sentiment-analysis]
+WITH [
+  "Extremely well-prepared and tasty lunch with stylish presentations. The salad buffet is well-stocked with various fine pasta salads, potato salads, etc.
+The staff is friendly and the service is impeccable.",
+  "The lunch menu looked nice and the food looked good when it arrived but unfortunately was completely tasteless. Can't give anything but a one when I factor in the expensive price point."
+] AS reviewsList
+WITH
+  reduce(acc = '[', r IN reviewsList | acc + '"' + r + '"' + ', ') + ']' AS reviews,
+  {
+    type: 'object',
+    properties: {
+      sentiments: {
+        type: 'array',
+        items: {
+          type: 'object',
+          properties: {
+            sentiment: {type: "string", enum: ['positive', 'negative', 'neutral']},
+            reason: {type: "string"}
+          },
+          required: ["sentiment", "reason"],
+          additionalProperties: false
+        }
+      }
+    },
+    required: ['sentiments'],
+    additionalProperties: false
+  } AS schema,
   {
     token: $openaiToken,
     model: 'gpt-5-nano'
   } AS conf
 RETURN
   ai.text.structuredCompletion(
-    'Classify these films into their correct genres, using only the genres ['SciFi’, 'Horror’, 'Action’, 'Romance’, 'Drama’, 'Documentary’, 'Other’]. Films: ' + movies,
+    "What are the general sentiments of these restaurant reviews? " + reviews,
     schema,
     'openai',
     conf
-  ) AS result
+)
 ----
 
 ======
@@ -334,9 +548,34 @@ RETURN
 [.include-with-Azure-OpenAI]
 ======
 
-[source, cypher, test-result-skip, subs="+macros"]
+[source, cypher, test-result-skip]
 ----
-include::partial$generate-structured-output.adoc[tag=sentiment-analysis]
+WITH [
+  "Extremely well-prepared and tasty lunch with stylish presentations. The salad buffet is well-stocked with various fine pasta salads, potato salads, etc.
+The staff is friendly and the service is impeccable.",
+  "The lunch menu looked nice and the food looked good when it arrived but unfortunately was completely tasteless. Can't give anything but a one when I factor in the expensive price point."
+] AS reviewsList
+WITH
+  reduce(acc = '[', r IN reviewsList | acc + '"' + r + '"' + ', ') + ']' AS reviews,
+  {
+    type: 'object',
+    properties: {
+      sentiments: {
+        type: 'array',
+        items: {
+          type: 'object',
+          properties: {
+            sentiment: {type: "string", enum: ['positive', 'negative', 'neutral']},
+            reason: {type: "string"}
+          },
+          required: ["sentiment", "reason"],
+          additionalProperties: false
+        }
+      }
+    },
+    required: ['sentiments'],
+    additionalProperties: false
+  } AS schema,
   {
     token: $azureopenaiToken,
     resource: $azureopenaiResource,
@@ -344,11 +583,11 @@ include::partial$generate-structured-output.adoc[tag=sentiment-analysis]
   } AS conf
 RETURN
   ai.text.structuredCompletion(
-    'Classify these films into their correct genres, using only the genres ['SciFi’, 'Horror’, 'Action’, 'Romance’, 'Drama’, 'Documentary’, 'Other’]. Films: ' + movies,
+    "What are the general sentiments of these restaurant reviews? " + reviews,
     schema,
     'azure-openai',
     conf
-  ) AS result
+)
 ----
 
 ======
@@ -356,9 +595,34 @@ RETURN
 [.include-with-VertexAI]
 ======
 
-[source, cypher, test-result-skip, subs="+macros"]
+[source, cypher, test-result-skip]
 ----
-include::partial$generate-structured-output.adoc[tag=sentiment-analysis]
+WITH [
+  "Extremely well-prepared and tasty lunch with stylish presentations. The salad buffet is well-stocked with various fine pasta salads, potato salads, etc.
+The staff is friendly and the service is impeccable.",
+  "The lunch menu looked nice and the food looked good when it arrived but unfortunately was completely tasteless. Can't give anything but a one when I factor in the expensive price point."
+] AS reviewsList
+WITH
+  reduce(acc = '[', r IN reviewsList | acc + '"' + r + '"' + ', ') + ']' AS reviews,
+  {
+    type: 'object',
+    properties: {
+      sentiments: {
+        type: 'array',
+        items: {
+          type: 'object',
+          properties: {
+            sentiment: {type: "string", enum: ['positive', 'negative', 'neutral']},
+            reason: {type: "string"}
+          },
+          required: ["sentiment", "reason"],
+          additionalProperties: false
+        }
+      }
+    },
+    required: ['sentiments'],
+    additionalProperties: false
+  } AS schema,
   {
     apiKey: $vertexaiToken,
     project: $vertexaiProject,
@@ -368,11 +632,11 @@ include::partial$generate-structured-output.adoc[tag=sentiment-analysis]
   } AS conf
 RETURN
   ai.text.structuredCompletion(
-    'Classify these films into their correct genres, using only the genres ['SciFi’, 'Horror’, 'Action’, 'Romance’, 'Drama’, 'Documentary’, 'Other’]. Films: ' + movies,
+    "What are the general sentiments of these restaurant reviews? " + reviews,
     schema,
     'vertexai',
     conf
-  ) AS result
+)
 ----
 
 ======
@@ -380,9 +644,34 @@ RETURN
 [.include-with-Bedrock]
 ======
 
-[source, cypher, test-result-skip, subs="+macros"]
+[source, cypher, test-result-skip]
 ----
-include::partial$generate-structured-output.adoc[tag=sentiment-analysis]
+WITH [
+  "Extremely well-prepared and tasty lunch with stylish presentations. The salad buffet is well-stocked with various fine pasta salads, potato salads, etc.
+The staff is friendly and the service is impeccable.",
+  "The lunch menu looked nice and the food looked good when it arrived but unfortunately was completely tasteless. Can't give anything but a one when I factor in the expensive price point."
+] AS reviewsList
+WITH
+  reduce(acc = '[', r IN reviewsList | acc + '"' + r + '"' + ', ') + ']' AS reviews,
+  {
+    type: 'object',
+    properties: {
+      sentiments: {
+        type: 'array',
+        items: {
+          type: 'object',
+          properties: {
+            sentiment: {type: "string", enum: ['positive', 'negative', 'neutral']},
+            reason: {type: "string"}
+          },
+          required: ["sentiment", "reason"],
+          additionalProperties: false
+        }
+      }
+    },
+    required: ['sentiments'],
+    additionalProperties: false
+  } AS schema,
   {
     accessKeyId: $bedrockKey,
     secretAccessKey: $bedrockSecret,
@@ -391,10 +680,11 @@ include::partial$generate-structured-output.adoc[tag=sentiment-analysis]
   } AS conf
 RETURN
   ai.text.structuredCompletion(
-    'Classify these films into their correct genres, using only the genres ['SciFi’, 'Horror’, 'Action’, 'Romance’, 'Drama’, 'Documentary’, 'Other’]. Films: ' + movies,
+    "What are the general sentiments of these restaurant reviews? " + reviews,
+    schema,
     'bedrock',
     conf
-  ) AS result
+)
 ----
 
 ======

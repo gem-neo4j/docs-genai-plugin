@@ -1,5 +1,13 @@
 = Functions and procedures
 
+[NOTE]
+Functions and procedures are different Cypher features: _functions_ are used inside expressions and evaluate to a value, whereas _procedures_ are invoked with `CALL`.
+For more information, see link:https://neo4j.com/docs/cypher-manual/current/functions/[Cypher -> Functions] and link:https://neo4j.com/docs/cypher-manual/current/clauses/call/[Cypher -> CALL procedure].
+
+[IMPORTANT]
+Most GenAI features are available only in Cypher 25.
+If your database's default language is Cypher 5, prepend the query with `CYPHER 25` to override the default for that query (see link:https://neo4j.com/docs/cypher-manual/current/queries/select-version/[Cypher -> Select Cypher version]).
+
 [[ai-text-aggregate-completion]]
 [role=label--function label--new-2026.03 label--Cypher-25]
 == ai.text.aggregateCompletion()
@@ -42,6 +50,8 @@
 2+| *Returns*                            | `STRING` | Generated text based on the provided prompt.
 |===
 
+For usage examples, see xref:generate-text.adoc#generate-once[Generate text from prompt].
+
 
 [[ai-text-completion-providers]]
 [role=label--procedure label--new-2025.11 label--Cypher-25]
@@ -55,6 +65,8 @@
 |                         `optionalConfigType` | `STRING` | The signature of the optional configuration options.
 |                         `defaultConfig`      | `MAP`    | Default configuration option values.
 |===
+
+For provider details and examples, see xref:generate-text.adoc#providers[Generate text -> Providers].
 
 
 [[ai-text-completion-with-structure]]
@@ -71,6 +83,8 @@
 2+| *Returns*                            | `MAP`    | A structured map conforming to the provided schema.
 |===
 
+For usage examples, see xref:generate-structured-output.adoc[Generate structured output].
+
 
 [[ai-text-completion-with-structure-providers]]
 [role=label--procedure label--new-2026.02 label--Cypher-25]
@@ -84,6 +98,8 @@
 |                         `optionalConfigType` | `STRING` | The signature of the optional configuration options.
 |                         `defaultConfig`      | `MAP`    | Default configuration option values.
 |===
+
+For provider details and examples, see xref:generate-structured-output.adoc#providers[Generate structured output -> Providers].
 
 
 [[ai-text-chat]]
@@ -101,6 +117,8 @@
 
 |===
 
+For usage examples, see xref:generate-text.adoc#chat-with-context[Chat with context].
+
 
 [[ai-text-chat-providers]]
 [role=label--procedure label--new-2025.12 label--Cypher-25]
@@ -114,6 +132,8 @@
 |                         `optionalConfigType` | `STRING` | The signature of the optional configuration options.
 |                         `defaultConfig`      | `MAP`    | Default configuration option values.
 |===
+
+For provider details and examples, see xref:generate-text.adoc#providers[Generate text -> Providers].
 
 
 [[ai-text-embed]]
@@ -129,6 +149,8 @@
 | `configuration` | `MAP` | The provider specific settings.
 2+| *Returns* | `VECTOR` | The generated vector embedding for the resource.
 |===
+
+For usage examples, see xref:embeddings.adoc#single-embedding[Generate and store a single embedding].
 
 
 [[ai-text-embed-batch]]
@@ -148,6 +170,8 @@
 | `vector` | `VECTOR` | The generated vector embedding for the resource.
 |===
 
+For usage examples, see xref:embeddings.adoc#multiple-embeddings[Generate and store a batch of embeddings].
+
 
 [[ai-text-embed-providers]]
 [role=label--procedure label--new-2025.11 label--Cypher-25]
@@ -163,10 +187,16 @@
 | `defaultConfig` | `MAP` | The default values for the GenAI provider.
 |===
 
+For provider details and examples, see xref:embeddings.adoc#providers[Embeddings -> Providers].
+
 
 [[genai-vector-encode]]
 [role=label--function label--deprecated-Cypher-25]
 == genai.vector.encode()
+
+[WARNING]
+Deprecated in Cypher 25.
+Use xref:reference/functions-procedures.adoc#ai-text-embed[`ai.text.embed()`] instead.
 
 |===
 | *Syntax* 3+m| genai.vector.encode(resource, provider, configuration = {}) :: ANY
@@ -178,10 +208,16 @@
 2+| *Returns* | `ANY` | The generated vector embedding for the resource.
 |===
 
+For current usage examples, see xref:embeddings.adoc#single-embedding[Generate and store a single embedding].
+
 
 [[genai-vector-encode-batch]]
 [role=label--procedure label--deprecated-Cypher-25]
 == genai.vector.encodeBatch()
+
+[WARNING]
+Deprecated in Cypher 25.
+Use xref:reference/functions-procedures.adoc#ai-text-embed-batch[`ai.text.embedBatch()`] instead.
 
 |===
 | *Syntax* 3+m| genai.vector.encodeBatch(resources, provider, configuration = {}) :: (index, resource, vector)
@@ -196,10 +232,16 @@
 | `vector` | `ANY` | The generated vector embedding for the resource.
 |===
 
+For current usage examples, see xref:embeddings.adoc#multiple-embeddings[Generate and store a batch of embeddings].
+
 
 [[genai-vector-list-encoding-providers]]
 [role=label--procedure label--deprecated-Cypher-25]
 == genai.vector.listEncodingProviders()
+
+[WARNING]
+Deprecated in Cypher 25.
+Use xref:reference/functions-procedures.adoc#ai-text-embed-providers[`ai.text.embed.providers()`] instead.
 
 |===
 | *Syntax* 3+m| genai.vector.listEncodingProviders() :: (name, requiredConfigType, optionalConfigType, defaultConfig)
@@ -207,6 +249,8 @@
 .5+| *Return arguments* | *Name* | *Type* | *Description*
 | `name` | `STRING` | The name of the GenAI provider.
 | `requiredConfigType` | `STRING` | The signature of the required config map.
-| `optionalConfigType` | `STRING` | "The signature of the optional config map.
+| `optionalConfigType` | `STRING` | The signature of the optional config map.
 | `defaultConfig` | `MAP` | The default values for the GenAI provider.
 |===
+
+For current provider details and examples, see xref:embeddings.adoc#providers[Embeddings -> Providers].

@@ -62,4 +62,4 @@ bin/neo4j start --expand-commands
 
 [NOTE]
 The GenAI plugin uses Neo4j's command expansion capability.
-See https://neo4j.com/docs/operations-manual/current/configuration/neo4j-conf/#neo4j-conf-expand-commands[Operations Manual -> The neo4j.conf file] for more information.
+See https://neo4j.com/docs/operations-manual/current/configuration/command-expansion/[Operations Manual -> Configuration > Command expansion] for more information.
