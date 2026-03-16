@@ -11,12 +11,13 @@
 [role=label--new-2025.11]
 == Generate text from prompt
 
-The function `ai.text.completion` can be used to generate text based on a textual input prompt.
+The function `ai.text.completion` can be used to generate text based on a text prompt.
 It is similar to submitting a prompt to an LLM.
 
 [NOTE]
 Use `CALL ai.text.completion.providers()` (see xref:reference/functions-procedures.adoc#ai-text-completion-providers[reference]) to see supported providers and their configuration options.
 
+[role=label--function label--new-2025.11]
 [cols="1,1,1,3"]
 .Signature for `ai.text.completion`
 |===
@@ -210,6 +211,181 @@ RETURN ai.text.completion(
 
 ====
 
+[role=label--new-2026.03]
+[[aggregate-completion]]
+== Generate text for multiple values
+
+The function `ai.text.aggregateCompletion` can be used to generate text for multiple inputs based on a text prompt.
+It is similar to submitting the same prompt to an LLM for each of the provided values.
+
+[role=label--function label--new-2026.03]
+[cols="1,1,1,3"]
+.Signature for `ai.text.aggregateCompletion`
+|===
+|    *Syntax*        3+| `ai.text.aggregateCompletion(value, prompt, provider, configuration = {}) :: STRING`
+|    *Description*   3+| Aggregating function that generates text from the specified prompt across grouped rows.
+.5+| *Input arguments* | *Name*          | *Type*   | *Description*
+|                        `value`         | `STRING` | The value to aggregate over.
+|                        `prompt`        | `STRING` | The prompt to generate text from.
+|                        `provider`      | `STRING` | The identifier of the provider: 'Azure-OpenAI', 'Bedrock', 'Bedrock-Nova', 'Bedrock-Titan', 'OpenAI', 'VertexAI'.
+|                        `configuration` | `MAP`    | Provider specific configuration, use `CALL ai.text.structuredCompletion.providers()` to find the configuration needed for each provider. You can specify additional vendor options by adding `vendorOptions` with a map of values that will be passed along in the request.
+2+| *Returns*                            | `STRING` | Generated text based on the provided prompt.
+|===
+
+[.tabbed-example]
+====
+[.include-with-OpenAI]
+======
+
+The example below aggregates product descriptions per product category and asks the external AI provider to summarize the key themes into a short bullet pointed list.
+
+[source, cypher, test-result-skip]
+----
+MATCH (p:Product)
+WITH p, {
+    token: $openaiToken,
+    model: 'gpt-5-nano'
+  } AS config
+RETURN p.category AS category,
+       ai.text.aggregateCompletion(
+         p.description,  // <.>
+         'Summarize the key themes in these product descriptions as a short bullet list.',
+         'openai',
+         config
+       ) AS category_summary  // <.>
+ORDER BY category;
+----
+
+<.> The `value` argument indicates the expression being aggregated (such as a column varying within the group).
+It must be of type `STRING` -- use Cypher's link:https://neo4j.com/docs/cypher-manual/current/functions/string/#functions-tostring[`toString()`] function to convert non-string values.
+<.> The function produces a single `STRING` per group.
+
+[role="queryresult",options="header",cols="1,3"]
+|===
+| category | category_summary
+| "Books" | "- Imaginative storytelling\n- Strong character development\n- Themes of friendship and adventure"
+| "Electronics" | "- Battery life and fast charging\n- Camera quality\n- Value for money"
+|===
+
+======
+
+[.include-with-Azure-OpenAI]
+======
+
+The example below aggregates product descriptions per product category and asks the external AI provider to summarize the key themes into a short bullet pointed list.
+
+[source, cypher]
+----
+MATCH (p:Product)
+WITH p, {
+    token: $azureOpenaiToken,
+    resource: '<azure-openai-resource>',
+    model: 'gpt-5-nano'
+  } AS config
+RETURN p.category AS category,
+       ai.text.aggregateCompletion(
+         p.description,  // <.>
+         'Summarize the key themes in these product descriptions as a short bullet list.',
+         'azure-openai',
+         config
+       ) AS category_summary  // <.>
+ORDER BY category;
+----
+
+<.> The `value` argument indicates the expression being aggregated (such as a column varying within the group).
+It must be of type `STRING` -- use Cypher's link:https://neo4j.com/docs/cypher-manual/current/functions/string/#functions-tostring[`toString()`] function to convert non-string values.
+<.> The function produces a single `STRING` per group.
+
+[role="queryresult",options="header",cols="1,3"]
+|===
+| category | category_summary
+| "Books" | "- Engaging plots\n- Relatable characters\n- Uplifting messages"
+| "Electronics" | "- Performance and speed\n- Display quality\n- Price-to-features ratio"
+|===
+
+======
+
+[.include-with-VertexAI]
+======
+
+The example below aggregates product descriptions per product category and asks the external AI provider to summarize the key themes into a short bullet pointed list.
+
+[source, cypher]
+----
+MATCH (p:Product)
+WITH p, {
+    token: $vertexaiToken,
+    model: 'gemini-2.5-flash-lite',
+    publisher: 'google',
+    project: '<google-cloud-project>',
+    region: '<gcp-region>'
+  } AS conf
+RETURN p.category AS category,
+       ai.text.aggregateCompletion(
+         p.description,  // <.>
+         'Summarize the key themes in these product descriptions as a short bullet list.',
+         'vertexai',
+         conf
+       ) AS category_summary  // <.>
+ORDER BY category;
+----
+
+<.> The `value` argument indicates the expression being aggregated (such as a column varying within the group).
+It must be of type `STRING` -- use Cypher's link:https://neo4j.com/docs/cypher-manual/current/functions/string/#functions-tostring[`toString()`] function to convert non-string values.
+<.> The function produces a single `STRING` per group.
+
+[role="queryresult",options="header",cols="1,3"]
+|===
+| category | category_summary
+| "Books" | "- Fantasy and sci‑fi focus\n- Heroic arcs\n- Friendship and discovery"
+| "Electronics" | "- Battery life\n- Camera and screen\n- Value"
+|===
+
+======
+
+[.include-with-Bedrock]
+======
+
+The example below aggregates product descriptions per product category and asks the external AI provider to summarize the key themes into a short bullet pointed list.
+
+[source, cypher]
+----
+MATCH (p:Product)
+WITH p, {
+    accessKeyId: $awsAccessKeyId,
+    secretAccessKey: $secretAccessKey,
+    model: 'amazon.nova-micro-v1:0',
+    region: '<aws-region>'
+  } AS conf
+RETURN p.category AS category,
+       ai.text.aggregateCompletion(
+         p.description,  // <.>
+         'Summarize the key themes in these product descriptions as a short bullet list.',
+         'bedrock-nova',
+         conf
+       ) AS category_summary  // <.>
+ORDER BY category;
+----
+
+<.> The `value` argument indicates the expression being aggregated (such as a column varying within the group).
+It must be of type `STRING` -- use Cypher's link:https://neo4j.com/docs/cypher-manual/current/functions/string/#functions-tostring[`toString()`] function to convert non-string values.
+<.> The function produces a single `STRING` per group.
+
+[role="queryresult",options="header",cols="1,3"]
+|===
+| category | category_summary
+| "Books" | "- Adventure and wonder\n- Character growth\n- Positive tone"
+| "Electronics" | "- Performance\n- Battery\n- Price"
+|===
+
+======
+====
+
+[IMPORTANT]
+Use grouping keys appropriately: everything not aggregated must be included in the `RETURN` grouping.
+
+[TIP]
+Aggregations can involve many rows per group, so start with concise prompts and iterate.
 
 [[chat-with-context]]
 [role=label--new-2025.12]
@@ -221,6 +397,7 @@ The function `ai.text.chat` allows you to exchange several messages with an LLM,
 Chats are only supported with OpenAI and Azure-OpenAI.
 Use `CALL ai.text.chat.providers()` (see xref:reference/functions-procedures.adoc#ai-text-chat-providers[reference]) to see supported providers and their configuration options.
 
+[role=label--function label--new-2025.12]
 [cols="1,1,1,3"]
 .Signature for `ai.text.chat`
 |===
