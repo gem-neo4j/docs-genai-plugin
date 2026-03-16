@@ -35,6 +35,13 @@ CALL ai.text.tokenCount.providers() YIELD name, requiredConfigType, optionalConf
 ----
 | New function xref:reference/functions-procedures.adoc#ai-text-token-count[`ai.text.tokenCount()`] for estimating the number of tokens in an input string, and new procedure xref:reference/functions-procedures.adoc#ai-text-token-count-providers[`ai.text.tokenCount.providers()`] to display the available providers and their config setup.
 
+a|
+[source, cypher]
+----
+RETURN ai.text.chunkByTokenLimit(input, limit, model, overlap)
+----
+| New function xref:reference/functions-procedures.adoc#ai-text-chunk-by-token-limit[`ai.text.chunkByTokenLimit()`] for splitting a string into chunks based on a token limit.
+
 See xref:count-tokens.adoc[].
 
 |===

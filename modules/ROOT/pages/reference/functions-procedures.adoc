@@ -202,7 +202,7 @@ For provider details and examples, see xref:embeddings.adoc#providers[Embeddings
 
 |===
 |    *Syntax*        3+| `ai.text.tokenCount(input, provider, configuration = {}) :: INTEGER`
-|    *Description*   3+| Generate token count for the specified input.
+|    *Description*   3+| Retrieve the token count for given input using the specified provider.
 .4+| *Input arguments* | *Name*          | *Type*   | *Description*
 |                        `input`         | `STRING` | The input to generate token count for.
 |                        `provider`      | `STRING` | The identifier of the provider: 'Bedrock', 'OpenAI', 'VertexAI'. The default is 'OpenAI'.
@@ -223,6 +223,22 @@ For provider details and examples, see xref:embeddings.adoc#providers[Embeddings
 |                         `requiredConfigType` | `STRING` | The signature of the required config map.
 |                         `optionalConfigType` | `STRING` | The signature of the optional config map.
 |                         `defaultConfig`      | `MAP`    | The default values for the GenAI provider.
+|===
+
+
+[[ai-text-chunk-by-token-limit]]
+[role=label--function label--new-2026.04 label--Cypher-25]
+== ai.text.chunkByTokenLimit()
+
+|===
+|    *Syntax*        3+| `ai.text.chunkByTokenLimit(input, limit, model = 'gpt-4', overlap = 0) :: LIST<STRING>`
+|    *Description*   3+| Chunk text by token limit.
+.5+| *Input arguments* | *Name*          | *Type*   | *Description*
+|                        `input`         | `STRING` | The input to chunk.
+|                        `limit`         | `INTEGER` | The token limit for each chunk.
+|                        `model`         | `STRING` | The model to use for tokenization. The default is 'gpt-4'.
+|                        `overlap`       | `INTEGER` | The number of tokens to overlap between chunks. The default is 0.
+2+| *Returns*                            | `LIST<STRING>` | A list of strings, each within the token limit.
 |===
 
 
