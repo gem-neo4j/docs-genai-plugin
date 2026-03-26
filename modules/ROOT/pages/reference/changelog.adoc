@@ -16,6 +16,25 @@ Cypher 25 was introduced in Neo4j 2025.06 and can only be used on Neo4j 2025.06+
 For more information, see link:{neo4j-docs-base-uri}/cypher-manual/25/queries/select-version[Cypher Manual -> Select Cypher version].
 
 
+[[neo4j-2026.04]]
+== Neo4j 2026.04
+
+=== Updated in Cypher 25
+
+[cols="2", options="header"]
+|===
+| Feature
+| Details
+
+a|
+Custom base URL for Azure OpenAI via the `genai.azure.openai.baseurl` setting in the `genai.conf` file.
+|
+Applies to all `ai.text.*` calls that use Azure OpenAI.
+See xref:reference/config.adoc#config-genai.azure.openai.baseurl[Configuration Options -> genai.azure.openai.baseurl].
+
+|===
+
+
 [[neo4j-2026.03]]
 == Neo4j 2026.03
 

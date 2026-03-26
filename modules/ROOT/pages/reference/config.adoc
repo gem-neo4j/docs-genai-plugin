@@ -27,7 +27,20 @@ a|Sets the base URL used by the OpenAI provider in `ai.text.*` functions and pro
 |Valid values
 a|`STRING`
 |Default value
-m|+++https://api.openai.com+++
+m|+++https://api.openai.com/v1+++
+|===
+
+
+[[config-genai.azure.openai.baseurl]]
+.genai.azure.openai.baseurl label:new[Introduced in 2026.04]
+[cols="<1s,<4"]
+|===
+|Description
+a|Sets the base URL used by the Azure OpenAI provider in `ai.text.*` functions and procedures. The URL is allowed maximum one string formatting symbol `%s` which will be replaced with the `resource`.
+|Valid values
+a|`STRING`
+|Default value
+m|+++https://%s.openai.azure.com/openai/v1+++. By default, the URL is constructed based on the `resource` parameter.
 |===
 
 
@@ -37,6 +50,7 @@ m|+++https://api.openai.com+++
 [source,ini]
 ----
 genai.openai.baseurl=https://my-openai-proxy.example.com
+genai.azure.openai.baseurl=https://my-azure-openai-proxy.example.com
 ----
 
 
