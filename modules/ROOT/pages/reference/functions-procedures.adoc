@@ -210,6 +210,8 @@ For provider details and examples, see xref:embeddings.adoc#providers[Embeddings
 2+| *Returns*                            | `INTEGER` | The number of tokens in the input.
 |===
 
+For usage examples, see xref:count-tokens.adoc#count-tokens[Count tokens and chunk text by token length].
+
 
 [[ai-text-token-count-providers]]
 [role=label--procedure label--new-2026.04 label--Cypher-25]
@@ -224,6 +226,8 @@ For provider details and examples, see xref:embeddings.adoc#providers[Embeddings
 |                         `optionalConfigType` | `STRING` | The signature of the optional config map.
 |                         `defaultConfig`      | `MAP`    | The default values for the GenAI provider.
 |===
+
+For provider details, see xref:count-tokens.adoc#count-token-providers[Count tokens and chunk text by token length -> Providers].
 
 
 [[ai-text-chunk-by-token-limit]]
@@ -240,6 +244,8 @@ For provider details and examples, see xref:embeddings.adoc#providers[Embeddings
 |                        `overlap`       | `INTEGER` | The number of tokens to overlap between chunks. The default is 0.
 2+| *Returns*                            | `LIST<STRING>` | A list of strings, each within the token limit.
 |===
+
+For usage examples, see xref:count-tokens.adoc#chunk-by-token-limit[Count tokens and chunk text by token length].
 
 
 [[genai-vector-encode]]

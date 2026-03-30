@@ -1,31 +1,16 @@
-:description: Count the number of tokens or chunk by them in a given input string using a specific AI provider.
-:page-role:
+:description: Count the number of tokens or chunk by them in an input string with AI providers.
 :table-caption!:
+:test-setup-dump: https://github.com/neo4j-graph-examples/recommendations/raw/main/data/recommendations-5.26-block.dump
 
-= Counting and chunking text by token length
+
+= Count tokens and chunk text by token length
 
 [[count-tokens]]
 [role=label--new-2026.04]
 == Count tokens
 
-The function `ai.text.tokenCount` can be used to estimate the number of tokens in a given input string.
-This is useful for understanding the cost and limits of your requests to external AI providers.
-
-Omitting the `provider` and `configuration` defaults to the OpenAI tokenizer, which provides a general-purpose estimate for the number of tokens.
-
-Different providers use different methods for token counting:
-
-- **OpenAI** (`OpenAI`): Uses a local tokenizer, meaning no API call is made and no API `token` is required in the configuration.
-- **Amazon Bedrock** (`Bedrock`): Makes a free API call to AWS to count tokens. You must provide the necessary credentials (such as `accessKeyId`, `secretAccessKey`, and `region`) in the configuration.
-For more information about supported models, see the link:https://docs.aws.amazon.com/bedrock/latest/userguide/count-tokens.html[AWS Bedrock documentation].
-- **Google Vertex AI** (`VertexAI`): Makes a free API call to Google Cloud to count tokens. You must provide the necessary configuration (such as `project`, `region`, and `apiKey` or `token`).
-For more information about supported models, see the link:https://docs.cloud.google.com/vertex-ai/generative-ai/docs/model-reference/count-tokens[Google Vertex AI documentation].
-
-[TIP]
-If your model is not supported, use the default `OpenAI` provider and model to get an *estimate*.
-
-[NOTE]
-Use `CALL ai.text.tokenCount.providers()` (see xref:reference/functions-procedures.adoc#ai-text-token-count-providers[reference]) to see supported providers and their configuration options.
+The function `ai.text.tokenCount` estimates the number of tokens from an input string.
+It is useful for understanding the cost and limits of your requests to external AI providers.
 
 [cols="1,1,1,3"]
 .Signature for `ai.text.tokenCount`
@@ -39,9 +24,16 @@ Use `CALL ai.text.tokenCount.providers()` (see xref:reference/functions-procedur
 2+| *Returns*                            | `INTEGER` | The number of tokens in the input.
 |===
 
+[TIP]
+Omitting the `provider` and `configuration` arguments defaults to the OpenAI tokenizer, which provides a general-purpose token estimate.
+
+
+[[count-examples]]
 === Examples
 
-The example below counts the tokens in a simple string using the default OpenAI provider.
+[[counting-openai]]
+.Count tokens with OpenAI (default)
+=====
 
 [source, cypher, test-result-skip]
 ----
@@ -53,18 +45,19 @@ RETURN ai.text.tokenCount('Hello, how many tokens is this?') AS tokenCount
 | tokenCount
 | 8
 |===
-
-[[counting_with_provider]]
-.Counting tokens by provider
 =====
-The example below counts the tokens in the plot of a movie using a specific provider and model.
+
+[[counting-with-provider]]
+.Count tokens with specific provider
+=====
+This example counts the tokens in the plot of a movie using a specific provider and model.
 
 [.tabbed-example]
 ====
 [.include-with-OpenAI]
 ======
 
-[source, cypher, test-result-skip]
+[source, cypher]
 ----
 MATCH (m:Movie {title: 'The Matrix'})
 WITH m.plot AS plot, {
@@ -79,7 +72,7 @@ RETURN ai.text.tokenCount(plot, 'OpenAI', config) AS tokenCount
 ======
 
 
-[source, cypher, test-result-skip]
+[source, cypher]
 ----
 MATCH (m:Movie {title: 'The Matrix'})
 WITH m.plot AS plot, {
@@ -97,7 +90,7 @@ RETURN ai.text.tokenCount(plot, 'VertexAI', config) AS tokenCount
 [.include-with-Bedrock]
 ======
 
-[source, cypher, test-result-skip]
+[source, cypher]
 ----
 MATCH (m:Movie {title: 'The Matrix'})
 WITH m.plot AS plot, {
@@ -120,19 +113,37 @@ RETURN ai.text.tokenCount(plot, 'Bedrock', config) AS tokenCount
 |===
 =====
 
+[[count-token-providers]]
+=== Providers
+
+Different providers use different methods for counting tokens:
+
+- **OpenAI** (`OpenAI`) -- Uses a local tokenizer: no API call is made and no API `token` is required in the configuration.
+- **Amazon Bedrock** (`Bedrock`) -- Makes a free API call to AWS to count tokens. You must provide the necessary credentials (`accessKeyId`, `secretAccessKey`, `region`) in the configuration.
+For more information about supported models, see the link:https://docs.aws.amazon.com/bedrock/latest/userguide/count-tokens.html[AWS Bedrock documentation].
+- **Google Vertex AI** (`VertexAI`) -- Makes a free API call to Google Cloud to count tokens. You must provide the necessary configuration (`project`, `region`, and `apiKey` or `token`).
+For more information about supported models, see the link:https://docs.cloud.google.com/vertex-ai/generative-ai/docs/model-reference/count-tokens[Google Vertex AI documentation].
+
+[TIP]
+If your model is not supported, use the default `OpenAI` provider and model to get an *estimate*.
+
+[NOTE]
+Use `CALL ai.text.tokenCount.providers()` (see xref:reference/functions-procedures.adoc#ai-text-token-count-providers[reference]) to see supported providers and their configuration options.
+
+
 [[chunk-by-token-limit]]
 [role=label--new-2026.04]
 == Chunk by token limit
 
-The function `ai.text.chunkByTokenLimit` can be used to split a given input string into a list of strings, where each chunk is within a specified token limit.
-This is useful for preparing large texts for processing by LLMs that have a maximum token limit per request.
+The function `ai.text.chunkByTokenLimit` splits an input string into a list of strings, where each chunk is within a specified token limit.
+It is useful for preparing large texts for processing by LLMs that have a maximum token limit per request.
 
 [IMPORTANT]
 It is recommended to set a token limit that is slightly lower than the provider's maximum allowed limit, as the final request to the provider may include additional structural tokens (e.g., prompt templates, system instructions).
 
 `ai.text.chunkByTokenLimit` uses OpenAI models for tokenization. It attempts to chunk the text by newlines, then by spaces, or simply by the token count if no natural break points are found.
 
-The function also supports an `overlap` parameter, which allows you to include a number of tokens from the end of one chunk at the beginning of the next. This helps provide the LLM with more context between chunks.
+To provide the LLM with more context between chunks, use the `overlap` parameter to include a number of tokens from the end of one chunk at the beginning of the next.
 
 [cols="1,1,1,3"]
 .Signature for `ai.text.chunkByTokenLimit`
@@ -147,11 +158,16 @@ The function also supports an `overlap` parameter, which allows you to include a
 2+| *Returns*                            | `LIST<STRING>` | A list of strings, each within the token limit.
 |===
 
-=== Example
 
-The example below chunks a movie plot into chunks of 20 tokens each, with an overlap of 5 tokens.
+[[chunk-examples]]
+=== Examples
 
-[source, cypher, test-result-skip]
+
+.Chunk a movie plot
+=====
+This example splits a movie plot into chunks of 20 tokens each, with an overlap of 5 tokens.
+
+[source, cypher]
 ----
 MATCH (m:Movie {title: 'The Matrix'})
 RETURN ai.text.chunkByTokenLimit(m.plot, 20, 'gpt-4', 5) AS chunks
@@ -162,14 +178,18 @@ RETURN ai.text.chunkByTokenLimit(m.plot, 20, 'gpt-4', 5) AS chunks
 | chunks
 | ["Neo, a computer programmer and hacker, has always questioned the reality of the world ", "reality of the world around him. His suspicions are confirmed when Morpheus, ", "Morpheus, a rebel leader, contacts him and reveals the horrible truth to ", "the horrible truth to him."]
 |===
+=====
 
+
+[[chunk-with-embeddings]]
 === Use with embeddings
 
 The example below shows how to use `ai.text.chunkByTokenLimit` to ensure that a large text is chunked into smaller pieces before generating embeddings with `ai.text.embed`.
-For link:https://developers.openai.com/api/reference/resources/embeddings/methods/create/[OpenAI], the maximum token limit at the time of writing for embeddings is 8192. 
-To make sure that we stay below that limit, we set the token limit to `8000`, we also want to make sure each chunk has an overlap, in this example we used `20` to try and give an overlap of a sentence or two.
 
-[source, cypher, test-result-skip]
+For link:https://developers.openai.com/api/reference/resources/embeddings/methods/create/[OpenAI], the maximum token limit for embeddings is `8192`.
+To make sure not to go beyond that limit, the token limit is set to `8000`. To give an overlap of a sentence or two, `overlap` is set to `20`.
+
+[source, cypher]
 ----
 MATCH (m:Movie {title: 'The Matrix'})
 WITH ai.text.chunkByTokenLimit(m.plot, 8000, 'text-embedding-3-small', 20) AS chunks
