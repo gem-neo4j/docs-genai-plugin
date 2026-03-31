@@ -753,6 +753,11 @@ See xref:reference/config.adoc#config-genai.openai.baseurl[Configuration setting
 | `vendorOptions` | `MAP`       | `{}`      | Optional vendor options that will be passed on as-is in the request to Azure.
 |===
 
+[NOTE]
+Since 2026.04, you can change Azure OpenAI's base URL via the `genai.azure.openai.baseurl` setting.
+The change applies to all `ai.text.*` calls that use Azure OpenAI.
+See xref:reference/config.adoc#config-genai.azure.openai.baseurl[Configuration settings -> genai.azure.openai.baseurl].
+
 .Usage example
 [source, cypher]
 ----
