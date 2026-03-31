@@ -31,13 +31,13 @@ a|
 ----
 CALL ai.text.embedBatch(resources, provider, configuration)
 ----
-| The procedure `ai.text.embedBatch()` now supports a `maxBatchSize` configuration parameter for OpenAI, Azure OpenAI, and Vertex AI. 
-This limits the amount of data sent in each API request to reduce token size limit errors. 
+| The procedure `ai.text.embedBatch()` now supports a `maxBatchSize` configuration parameter for OpenAI, Azure OpenAI, and Vertex AI.
+This limits the amount of data sent in each API request to reduce token size limit errors.
 OpenAI and Azure OpenAI are set to `8192` by default. Vertex AI has no default and can be set by the user if needed.
 
 See xref:embeddings.adoc#multiple-embeddings[Embeddings -> Generate and store a batch of embeddings].
 
-|a
+a|
 Custom base URL for Azure OpenAI via the `genai.azure.openai.baseurl` setting in the `genai.conf` file.
 |
 Applies to all `ai.text.*` calls that use Azure OpenAI.
