@@ -37,6 +37,12 @@ OpenAI and Azure OpenAI are set to `8192` by default. Vertex AI has no default a
 
 See xref:embeddings.adoc#multiple-embeddings[Embeddings -> Generate and store a batch of embeddings].
 
+|a
+Custom base URL for Azure OpenAI via the `genai.azure.openai.baseurl` setting in the `genai.conf` file.
+|
+Applies to all `ai.text.*` calls that use Azure OpenAI.
+See xref:reference/config.adoc#config-genai.azure.openai.baseurl[Configuration Options -> genai.azure.openai.baseurl].
+
 |===
 
 

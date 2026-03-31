@@ -371,6 +371,11 @@ WITH
 RETURN ai.text.embed('Hello World!', 'azure-openai', conf) AS result
 ----
 
+[NOTE]
+Since 2026.04, you can change Azure OpenAI's base URL via the `genai.azure.openai.baseurl` setting.
+The change applies to all `ai.text.*` calls that use Azure OpenAI.
+See xref:reference/config.adoc#config-genai.azure.openai.baseurl[Configuration Options -> genai.azure.openai.baseurl].
+
 
 [[providers-google-vertexai]]
 === Google VertexAI
