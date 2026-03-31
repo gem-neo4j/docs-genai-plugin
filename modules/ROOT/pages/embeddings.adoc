@@ -318,7 +318,7 @@ The query `CALL ai.text.embed.providers()` (see xref:reference/functions-procedu
 | *Name*          | *Type*   | *Default* | *Description*
 | `model`         | `STRING` | -         | Model ID (see https://platform.openai.com/docs/models[OpenAI -> Models]).
 | `token`         | `STRING` | -         | OpenAI API key (see https://platform.openai.com/api-keys[OpenAI -> API Keys]).
-| `maxBatchSize`  | `INTEGER`| `8192`    | The maximum amount of data (measured in tokens) sent at a time. Introduced in 2026.04
+| `maxBatchSize`  | `INTEGER`| `8192`    | The maximum amount of data (measured in tokens) sent at a time. label:new[Introduced in 2026.04]
 | `vendorOptions` | `MAP`    | `{}`      | Optional vendor options that will be passed on as-is in the request to Open AI (see https://platform.openai.com/docs/api-reference/embeddings/create[OpenAI -> Create embeddings]).
 |===
 
@@ -345,14 +345,14 @@ See xref:reference/config.adoc#config-genai.openai.baseurl[Configuration Options
 [[providers-azure-openai]]
 === Azure OpenAI
 
-.OpenAI parameters
+.Azure OpenAI parameters
 [opts=header, cols="1,1,1,3"]
 |===
 | *Name*          | *Type*   | *Default* | *Description*
 | `model`         | `STRING` | -         | Model id (see https://learn.microsoft.com/en-us/azure/ai-foundry/openai/overview[Azure -> Azure OpenAI in Foundry Models]).
 | `resource`      | `STRING` | -         | Azure resource name.
 | `token`         | `STRING` | -         | Azure OAuth2 bearer token.
-| `maxBatchSize`  | `INTEGER`| `8192`    | The maximum amount of data (measured in tokens) sent at a time. Introduced in 2026.04
+| `maxBatchSize`  | `INTEGER`| `8192`    | The maximum amount of data (measured in tokens) sent at a time. label:new[Introduced in 2026.04]
 | `vendorOptions` | `MAP`    | `{}`      | Optional vendor options that will be passed on as-is in the request to Azure.
 |===
 
@@ -375,7 +375,7 @@ RETURN ai.text.embed('Hello World!', 'azure-openai', conf) AS result
 [[providers-google-vertexai]]
 === Google VertexAI
 
-.VertexAI parameters
+.Google VertexAI parameters
 [opts=header, cols="1,1,1,3"]
 |===
 | *Name*          | *Type*   | *Default*  | *Description*
@@ -385,7 +385,7 @@ RETURN ai.text.embed('Hello World!', 'azure-openai', conf) AS result
 | `publisher`     | `STRING` | `'google'` | Model publisher.
 | `apiKey`        | `STRING` | -          | Vertex AI API key.
 | `token`         | `STRING` | -          | Vertex AI API access token.
-| `maxBatchSize`  | `INTEGER`| -          | The maximum amount of data (measured in tokens) sent at a time. Introduced in 2026.04
+| `maxBatchSize`  | `INTEGER`| -          | The maximum amount of data (measured in tokens) sent at a time. label:new[Introduced in 2026.04]
 | `vendorOptions` | `MAP`    | `{}`       | Optional vendor options that will be passed on as-is in the request to Vertex (see https://cloud.google.com/vertex-ai/generative-ai/docs/reference/rest/v1/projects.locations.publishers.models/predict[Vertex AI -> Method: models.predict]).
 |===
 
