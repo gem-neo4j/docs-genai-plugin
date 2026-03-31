@@ -171,7 +171,7 @@ However, if the function call is misspelled or the query is otherwise malformed,
 This procedure attempts to generate embeddings for all supplied resources in a single API request.
 Providing too many resources may cause the AI provider to time out or to reject the request.
 
-For OpenAI, Azure OpenAI, and Vertex AI, the `maxBatchSize` configuration parameter can be used to limit the amount of data sent at a time to the provider.
+For OpenAI, Azure OpenAI, and Vertex AI, the `maxBatchSize` configuration parameter can be used to limit the amount of data sent per each API request to the provider.
 If a single resource is larger than the specified `maxBatchSize`, it must be chunked manually before being passed to the procedure.
 ====
 
