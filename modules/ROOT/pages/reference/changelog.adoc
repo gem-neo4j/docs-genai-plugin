@@ -19,6 +19,33 @@ For more information, see link:{neo4j-docs-base-uri}/cypher-manual/25/queries/se
 [[neo4j-2026.04]]
 == Neo4j 2026.04
 
+=== New in Cypher 25
+
+[cols="2", options="header"]
+|===
+| Feature
+| Details
+
+a|
+[source, cypher]
+----
+RETURN ai.text.tokenCount(input, provider, configuration)
+
+CALL ai.text.tokenCount.providers() YIELD name, requiredConfigType, optionalConfigType, defaultConfig
+----
+| New function xref:reference/functions-procedures.adoc#ai-text-token-count[`ai.text.tokenCount()`] for estimating the number of tokens in an input string, and new procedure xref:reference/functions-procedures.adoc#ai-text-token-count-providers[`ai.text.tokenCount.providers()`] to display the available providers and their config setup.
+
+a|
+[source, cypher]
+----
+RETURN ai.text.chunkByTokenLimit(input, limit, model, overlap)
+----
+| New function xref:reference/functions-procedures.adoc#ai-text-chunk-by-token-limit[`ai.text.chunkByTokenLimit()`] for splitting a string into chunks based on a token limit.
+
+See xref:count-tokens.adoc[].
+
+|===
+
 === Updated in Cypher 25
 
 [cols="2", options="header"]
