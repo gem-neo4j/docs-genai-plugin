@@ -44,6 +44,8 @@ RETURN ai.text.chunkByTokenLimit(input, limit, model, overlap)
 
 See xref:count-tokens.adoc[].
 
+|===
+
 === Updated in Cypher 25
 
 [cols="2", options="header"]
