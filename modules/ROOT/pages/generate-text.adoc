@@ -641,6 +641,30 @@ Want streaming options or region help?",
 ====
 
 
+[[web-access]]
+== Allow models to access the web
+
+Some models visit URLs if prompted to do so, but not all do.
+OpenAI requires the `tools` list to include `web_search`, provided via `vendorOptions`.
+
+[source, cypher]
+----
+RETURN ai.text.completion(
+  'Summarize https://en.wikipedia.org/wiki/Neo4j',
+  'OpenAI',
+  {
+    token: $openaiToken,
+    model: 'gpt-5-nano',
+    vendorOptions: {
+      tools: [{
+        type: 'web_search'
+      }]
+    }
+  }
+)
+----
+
+
 [[parallel-requests]]
 == Run multiple requests in parallel
 

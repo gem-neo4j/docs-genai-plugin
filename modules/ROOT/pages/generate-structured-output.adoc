@@ -901,6 +901,41 @@ Use grouping keys appropriately: everything not aggregated must be included in t
 Aggregations can involve many rows per group, so start with concise prompts and iterate.
 
 
+[[web-access]]
+== Allow models to access the web
+
+Some models visit URLs if prompted to do so, but not all do.
+OpenAI requires the `tools` list to include `web_search`, provided via `vendorOptions`.
+
+[source, cypher]
+----
+WITH
+  {
+    type: 'object',
+    properties: {
+      paragraph: {type: 'string'},
+      sentence: {type: 'string'}
+    },
+    required: ['paragraph', 'sentence'],
+    additionalProperties: false
+  } AS schema
+RETURN ai.text.structuredCompletion(
+  'Summarize https://en.wikipedia.org/wiki/Neo4j',
+  schema,
+  'OpenAI',
+  {
+    token: $openaiToken,
+    model: 'gpt-5-nano',
+    vendorOptions: {
+      tools: [{
+        type: 'web_search'
+      }]
+    }
+  }
+)
+----
+
+
 [[schema-requirements]]
 == Schema requirements
 
