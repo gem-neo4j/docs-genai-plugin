@@ -1,40 +1,40 @@
 :description: `ai.file.embedBatch` is used to embed text read from a file in batches as vectors using an AI provider.
 :table-caption!:
+:page-role: new--2025.05
 
-[[file-embeddings]]
-= File embeddings
 
-The `ai.file.embedBatch` procedure reads text from a file and generates vector embeddings for its content.
-The file can be local to the Neo4j server or accessed via a URL (`http`, `https`, or `ftp`).
+= Create and store file embeddings
+
+== Overview
+
+The `ai.file.embedBatch` procedure reads text from a local or remote file and generates vector embeddings for its content, optionally splitting it in chunks. It returns one row for each chunk, containing its index, the chunk content, and its embedding vector.
 
 [source, cypher]
 ----
 CALL ai.file.embedBatch(
   'https://example.com/large-document.txt', // <1>
   'OpenAI', // <2>
-  { token: $apiKey, model: 'text-embedding-3-small' }, // <3>
+  { token: $openaiToken, model: 'text-embedding-3-small' }, // <3>
   1000 // <4>
 ) YIELD index, resource, vector
 MERGE (n:Chunk {id: index})
 SET n.text = resource, n.embedding = vector
 ----
 
-<1> The path or URL of the file to be read.
-<2> Identifier of the AI provider to use.
-<3> Provider-specific configuration.
-<4> The maximum token count limit for each chunk.
-
-`ai.file.embedBatch` supports both local and remote URLs.
+<1> The path or URL of the source file.
+Both local and remote URLs (`http`, `https`, or `ftp`) are supported.
 Local paths are resolved relative to the Neo4j installation folder.
+<2> Identifier of the AI provider to use.
+If the given model is not supported, OpenAI's `ada` model is used.
+<3> Provider-specific configuration.
+<4> The maximum token count for each chunk.
+
+
 
 [NOTE]
 ====
 Accessing files with `ai.file.embedBatch` requires link:{neo4j-docs-base-uri}/operations-manual/current/authentication-authorization/load-privileges/[load privileges].
 ====
-
-== ai.file.embedBatch
-
-`ai.file.embedBatch` reads a file, optionally chunks it, and returns the embeddings. It attempts to use the given model, but if it is not supported will default to OpenAI's `ada` model.
 
 .Signature for `ai.file.embedBatch()`
 [role=label--procedure label--new-2026.05]
@@ -46,7 +46,7 @@ Accessing files with `ai.file.embedBatch` requires link:{neo4j-docs-base-uri}/op
 .5+| *Inputs* | *Name* | *Type* | *Description*
    | `file`
    | `STRING`
-   | The path or URL of the file to be read.
+   | The path or URL of the file to read.
 
    | `provider`
    | `STRING`
@@ -74,18 +74,23 @@ Accessing files with `ai.file.embedBatch` requires link:{neo4j-docs-base-uri}/op
    | The generated vector embedding for the resource.
 |===
 
-=== Chunking behavior
 
-* If `tokenCountLimit` is `null`, the entire file content is treated as a single resource and embedded.
-* If `tokenCountLimit` is provided, the file content is chunked into a list of resources, where each chunk's token count does not exceed the limit.
-* The procedure returns one row for each chunk, containing its index, the chunk text, and its embedding vector.
+.Chunking behavior
+[NOTE]
+====
+* If `tokenCountLimit` is `null`, the entire file content is embedded as a single resource.
+* If `tokenCountLimit` is provided, the file content is chunked into a list of resources, each within the token count limit.
+====
 
-== Embed text from files into Neo4j
 
+[#examples]
+== Examples
+
+[#example-local]
 [role=label--not-on-aura]
 === Import local files
 
-You can store files on the database server and then access them by using a `+file:///+` URL.
+You can store files on the database server and access them by using the `+file:///+` schema.
 By default, paths are resolved relative to the Neo4j import directory.
 
 .Embed text from a local file
@@ -105,7 +110,7 @@ Graph databases are well-suited for highly connected data.
 CALL ai.file.embedBatch(
   'file:///document.txt',
   'OpenAI',
-  { token: $apiKey, model: 'text-embedding-3-small' }
+  { token: $openaiToken, model: 'text-embedding-3-small' }
 ) YIELD index, resource, vector
 MERGE (c:Chunk {file: 'document.txt', index: index})
 SET c.text = resource, c.embedding = vector
@@ -125,20 +130,22 @@ Added 3 nodes, Set 6 properties, Added 3 labels
 |===
 ====
 
-==== Configuration settings for file URLs
-
+.Configuration settings for file URLs
+[NOTE]
+====
 link:{neo4j-docs-base-uri}/operations-manual/current/configuration/configuration-settings#config_dbms.security.allow_csv_import_from_file_urls[dbms.security.allow_csv_import_from_file_urls]::
-This setting determines whether `+file:///+` URLs are allowed.
+Whether `+file:///+` URLs are allowed.
 
 link:{neo4j-docs-base-uri}/operations-manual/current/configuration/configuration-settings#config_server.directories.import[server.directories.import]::
-This setting sets the root directory relative to which `+file:///+` URLs are parsed.
+The path relative to which `+file:///+` URLs are parsed.
+====
 
 
+[#example-remote]
 === Import from a remote location
 
-You can embed text from a file hosted on a remote path.
-
-`ai.file.embedBatch` supports accessing files via HTTPS, HTTP, and FTP (with or without credentials).
+`ai.file.embedBatch` can embed text from a file hosted on a remote path.
+It supports accessing files via HTTPS, HTTP, and FTP (with or without credentials).
 It also follows redirects, except those changing the protocol (for security reasons).
 
 .Embed text from a remote file via HTTPS
@@ -152,12 +159,12 @@ You can generate embeddings from it.
 ----
 
 .Query
-[source, cypher]
+[source, cypher, test-skip]
 ----
 CALL ai.file.embedBatch(
   'https://example.com/document.txt',
   'OpenAI',
-  { token: $apiKey, model: 'text-embedding-3-small' }
+  { token: $openaiToken, model: 'text-embedding-3-small' }
 ) YIELD index, resource, vector
 RETURN index, resource, vector
 ----
@@ -187,16 +194,16 @@ This is a file hosted on an FTP server.
 CALL ai.file.embedBatch(
   'ftp://<username>:<password>@<domain>/documents/file.txt',
   'OpenAI',
-  { token: $apiKey, model: 'text-embedding-3-small' }
+  { token: $openaiToken, model: 'text-embedding-3-small' }
 ) YIELD index, resource, vector
 RETURN index, resource, vector
 ----
 
 .Result
-[role="queryresult",options="header,footer",cols="2*<m"]
+[role="queryresult",options="header,footer",cols="3*<m"]
 |===
 | index | resource                                  | vector
 | 0     | 'This is a file hosted on an FTP server.' | [0.0052, -0.0393, ...]
-2+d|1 row
+3+d|1 row
 |===
 ====
