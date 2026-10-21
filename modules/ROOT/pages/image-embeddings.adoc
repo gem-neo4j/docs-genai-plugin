@@ -86,11 +86,18 @@ CALL ai.image.embed.providers()
 ----
 
 .Result
-[cols="1,1,1,2", options="header"]
+[queryresult, cols="1m,2m,2m,3m", options="header"]
 |===
 | name | requiredConfigType | optionalConfigType | defaultConfig
-| "Bedrock-Titan" | "{region: STRING, accessKeyId: STRING, secretAccessKey: STRING}" | "{model: STRING, vendorOptions: MAP}" | {model: "amazon.titan-embed-image-v1"}
-| "VertexAI" | "{project: STRING, region: STRING, apiKey: STRING | token: STRING}" | "{model: STRING, publisher: STRING, vendorOptions: MAP}" | {model: "multimodalembedding", publisher: "google"}
+| Bedrock-Titan
+| {region: STRING, accessKeyId: STRING, secretAccessKey: STRING}
+| {model: STRING, vendorOptions: MAP}
+| {model: "amazon.titan-embed-image-v1"}
+
+| VertexAI
+| {project: STRING, region: STRING, apiKey: STRING \| token: STRING}
+| {model: STRING, publisher: STRING, vendorOptions: MAP}
+| {model: "multimodalembedding", publisher: "google"}
 |===
 
 [[image-examples]]
