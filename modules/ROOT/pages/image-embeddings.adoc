@@ -23,7 +23,7 @@ Use the `ai.image.embed()` function to generate a vector embedding for a single 
 .4+| *Inputs* | *Name* | *Type* | *Description*
    | `resource`
    | `STRING`
-   | The image to transform into an embedding: either base64-encoded image bytes, a local file path (`file:///path/to/image`), or a remote URL (`http`/`https`/`ftp`).
+   | The image to transform into an embedding: either base64-encoded image bytes, a local file path (`\file:///path/to/image`), or a remote URL (`http`/`https`/`ftp`).
 
    | `provider`
    | `STRING`
@@ -51,7 +51,7 @@ Use the `ai.image.embedBatch()` procedure to generate embeddings for a list of i
 .4+| *Inputs* | *Name* | *Type* | *Description*
    | `resources`
    | `LIST<STRING>`
-   | The images to transform into embeddings: base64-encoded image bytes, local file paths (`file:///path/to/image`), or remote URLs (`http`/`https`/`ftp`).
+   | The images to transform into embeddings: base64-encoded image bytes, local file paths (`\file:///path/to/image`), or remote URLs (`http`/`https`/`ftp`).
 
    | `provider`
    | `STRING`

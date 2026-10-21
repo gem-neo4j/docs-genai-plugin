@@ -36,7 +36,7 @@ For usage examples, see xref:file-embeddings.adoc[].
 |    *Syntax*        3+| `ai.image.embed(resource, provider, configuration = {}) :: VECTOR`
 |    *Description*   3+| Encode a given image as a vector using the named provider.
 .4+| *Input arguments* | *Name*          | *Type*   | *Description*
-|                        `resource`      | `STRING` | The image to transform into an embedding: either base64-encoded image bytes, a local file path (file:///path/to/image), or a remote URL (http/https/ftp).
+|                        `resource`      | `STRING` | The image to transform into an embedding: either base64-encoded image bytes, a local file path (`\file:///path/to/image`), or a remote URL (`http`/`https`/`ftp`).
 |                        `provider`      | `STRING` | The identifier of the provider: 'Bedrock-Titan', 'VertexAI'.
 |                        `configuration` | `MAP`    | Provider specific configuration, use `CALL ai.image.embed.providers()` to find the configuration needed for each provider. You can specify additional vendor options by adding `vendorOptions` with a map of values that will be passed along in the request.
 2+| *Returns*                            | `VECTOR` | The generated vector embedding for the resource.
@@ -68,7 +68,7 @@ For provider details and examples, see xref:image-embeddings.adoc#image-provider
 |    *Syntax*        3+| `CALL ai.image.embedBatch(resources, provider, configuration = {}) YIELD index, resource, vector`
 |    *Description*   3+| Encode a given batch of images as vectors using the named provider.
 .4+| *Input arguments* | *Name*          | *Type*         | *Description*
-|                        `resources`     | `LIST<STRING>` | The images to transform into embeddings: base64-encoded image bytes, local file paths (file:///path/to/image), or remote URLs (http/https/ftp).
+|                        `resources`     | `LIST<STRING>` | The images to transform into embeddings: base64-encoded image bytes, local file paths (`\file:///path/to/image`), or remote URLs (`http`/`https`/`ftp`).
 |                        `provider`      | `STRING`       | The identifier of the provider: 'Bedrock-Titan', 'VertexAI'.
 |                        `configuration` | `MAP`          | Provider specific configuration, use `CALL ai.image.embed.providers()` to find the configuration needed for each provider. You can specify additional vendor options by adding `vendorOptions` with a map of values that will be passed along in the request.
 .4+| *Return arguments* | *Name*         | *Type*         | *Description*
