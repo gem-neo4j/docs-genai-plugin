@@ -236,7 +236,7 @@ The `condition` is itself the instruction to the provider, so there is no defaul
 [[predicate-filter]]
 .Filter on a condition
 =====
-Because `ai.text.predicate` returns a number, you can use it directly in a `WHERE` clause.
+`ai.text.predicate` returns a number, so you can use it directly in a `WHERE` clause.
 
 [source, cypher, test-skip]
 ----
@@ -279,7 +279,7 @@ RETURN ai.text.predicate(
 ) AS probability
 ----
 
-[role="queryresult",options="header",cols="1,1"]
+[role="queryresult",options="header",cols="1"]
 |===
 | probability
 | 0.96
@@ -313,6 +313,7 @@ If `questions` is an empty map, no request is made and the function returns an e
 === Question types
 
 Each question is a map with a `type` and `instructions` (both required `STRING` values), plus the keys for its type.
+The type is case insensitive.
 
 [cols="1,2,2"]
 |===
@@ -332,7 +333,6 @@ The types `boolean` and `noul` are accepted as aliases.
 | `{type: "score", score, confidence, probabilities}`
 |===
 
-The type is not case sensitive.
 
 [[decide-examples]]
 === Examples
@@ -396,7 +396,7 @@ All four functions use the same providers:
 * **Typesafe** (`Typesafe`)
 * **Google Vertex AI** (`VertexAI`)
 
-OpenAI, Azure OpenAI, and Typesafe have an endpoint that decides, and return probabilities calculated by the provider.
+OpenAI, Azure OpenAI, and Typesafe have an endpoint that decides and return probabilities calculated by the provider.
 Bedrock and Vertex AI do not, so they answer through structured output instead.
 For these two providers:
 
