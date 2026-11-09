@@ -80,7 +80,7 @@ When you give choices as a map, the descriptions help the provider to tell simil
 [[classify-list]]
 .Classify with a list of choices
 =====
-[source, cypher, test-skip]
+[source, cypher, test-result-skip]
 ----
 MATCH (m:Movie {title: 'Matrix, The'})
 WITH m.plot AS plot, {
@@ -102,7 +102,7 @@ RETURN ai.text.classify(plot, ['action', 'comedy', 'romance', 'documentary'], 'O
 =====
 This example describes each choice and replaces the default instruction.
 
-[source, cypher, test-skip]
+[source, cypher]
 ----
 MATCH (m:Movie {title: 'Matrix, The'})
 WITH m.plot AS plot, {
@@ -160,7 +160,7 @@ Because a map does not retain its order, `levels` must be a list; to describe a 
 [[score-list]]
 .Score on a list of levels
 =====
-[source, cypher, test-skip]
+[source, cypher, test-result-skip]
 ----
 MATCH (m:Movie {title: 'Matrix, The'})
 WITH m.plot AS plot, {
@@ -181,7 +181,7 @@ RETURN ai.text.score(plot, ['None', 'Mild', 'Moderate', 'Intense'], 'OpenAI', co
 [[score-described]]
 .Score with described levels
 =====
-[source, cypher, test-skip]
+[source, cypher, test-result-skip]
 ----
 MATCH (m:Movie {title: 'Matrix, The'})
 WITH m.plot AS plot, {
@@ -237,7 +237,7 @@ The `condition` is itself the instruction to the provider, so there is no defaul
 =====
 `ai.text.predicate` returns a number, so you can use it directly in a `WHERE` clause.
 
-[source, cypher, test-skip]
+[source, cypher, test-result-skip]
 ----
 MATCH (m:Movie {title: 'Matrix, The'})
 WITH m, ai.text.predicate(
@@ -260,7 +260,7 @@ RETURN m.title AS title, probability
 [[predicate-criteria]]
 .Describe what true and false mean
 =====
-[source, cypher, test-skip]
+[source, cypher]
 ----
 MATCH (m:Movie {title: 'Matrix, The'})
 RETURN ai.text.predicate(
@@ -339,7 +339,7 @@ The types `boolean` and `noul` are accepted as aliases.
 [[decide-all]]
 .Ask a predicate, a choice, and a score question together
 =====
-[source, cypher, test-skip]
+[source, cypher, test-result-skip]
 ----
 MATCH (m:Movie {title: 'Matrix, The'})
 WITH m.plot AS plot, {
