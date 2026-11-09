@@ -59,12 +59,12 @@ The results shown are illustrative: the output depends on the provider and model
 [cols="1,1,1,3"]
 |===
 |    *Syntax*        3+| `ai.text.classify(input, choices, provider, configuration = {}) :: MAP`
-|    *Description*   3+| Classify the input to one of the given choices, with probabilities.
+|    *Description*   3+| Classify the input into one of the given choices, with probabilities.
 .5+| *Inputs* | *Name*          | *Type*   | *Description*
 | `input`         | `STRING`              | The text to classify.
-| `choices`       | `LIST<STRING>` or `MAP` | The options to classify the input to. Either a list of options, or a map of option to a description of it.
+| `choices`       | `ANY` | The options to classify the input into. Either a list of options, or a map of the form `{<choice>: <description>}`.
 | `provider`      | `STRING`              | The identifier of the provider: 'Azure-OpenAI', 'Bedrock', 'OpenAI', 'Typesafe', 'VertexAI'.
-| `configuration` | `MAP`                 | Provider specific configuration, use `CALL ai.text.decide.providers()` to find the configuration needed for each provider. You can override the default classification instruction by adding `instructions` with a `STRING`.
+| `configuration` | `MAP`                 | Provider specific configuration, use `CALL ai.text.decide.providers()` to find the configuration needed for each provider.
 .4+| *Returns* | *Key*           | *Type*   | *Description*
 | `choice`        | `STRING`              | The selected option.
 | `confidence`    | `FLOAT`               | The confidence in the selected option.
@@ -84,8 +84,8 @@ When you give choices as a map, the descriptions help the provider to tell simil
 ----
 MATCH (m:Movie {title: 'Matrix, The'})
 WITH m.plot AS plot, {
-  token: $token,
-  model: $model
+  token: $openaiToken,
+  model: 'gpt-6-luna'
 } AS config
 RETURN ai.text.classify(plot, ['action', 'comedy', 'romance', 'documentary'], 'OpenAI', config) AS result
 ----
@@ -106,8 +106,8 @@ This example describes each choice and replaces the default instruction.
 ----
 MATCH (m:Movie {title: 'Matrix, The'})
 WITH m.plot AS plot, {
-  token: $token,
-  model: $model,
+  token: $openaiToken,
+  model: 'gpt-6-luna',
   instructions: 'Which audience is this movie best suited to?'
 } AS config
 RETURN ai.text.classify(
@@ -129,7 +129,6 @@ RETURN ai.text.classify(
 |===
 =====
 
-
 [[score]]
 [role=label--new-2026.11]
 == Score text
@@ -142,9 +141,9 @@ RETURN ai.text.classify(
 |    *Description*   3+| Score the input on the given levels, with probabilities.
 .5+| *Inputs* | *Name*          | *Type*   | *Description*
 | `input`         | `STRING`        | The text to score.
-| `levels`        | `LIST`          | The levels to score the input on, ordered lowest first. Either a list of levels, or a list of single entry maps of level to a description of it.
+| `levels`        | `ANY`           | The levels to score the input on, ordered lowest first. Either a list of levels, or a list of single entry maps of level to a description of it.
 | `provider`      | `STRING`        | The identifier of the provider: 'Azure-OpenAI', 'Bedrock', 'OpenAI', 'Typesafe', 'VertexAI'.
-| `configuration` | `MAP`           | Provider specific configuration, use `CALL ai.text.decide.providers()` to find the configuration needed for each provider. You can override the default scoring instruction by adding `instructions` with a `STRING`.
+| `configuration` | `MAP`           | Provider specific configuration, use `CALL ai.text.decide.providers()` to find the configuration needed for each provider.
 .4+| *Returns* | *Key*           | *Type*   | *Description*
 | `score`         | `FLOAT`         | The score of the input as a position on the scale, where `0` is the first (lowest) level. A fractional value falls between levels, weighted by their probabilities.
 | `confidence`    | `FLOAT`         | The confidence in the score.
@@ -165,8 +164,8 @@ Because a map does not retain its order, `levels` must be a list; to describe a 
 ----
 MATCH (m:Movie {title: 'Matrix, The'})
 WITH m.plot AS plot, {
-  token: $token,
-  model: $model,
+  token: $openaiToken,
+  model: 'gpt-6-luna',
   instructions: 'How much violence does this plot describe?'
 } AS config
 RETURN ai.text.score(plot, ['None', 'Mild', 'Moderate', 'Intense'], 'OpenAI', config) AS result
@@ -186,8 +185,8 @@ RETURN ai.text.score(plot, ['None', 'Mild', 'Moderate', 'Intense'], 'OpenAI', co
 ----
 MATCH (m:Movie {title: 'Matrix, The'})
 WITH m.plot AS plot, {
-  token: $token,
-  model: $model,
+  token: $openaiToken,
+  model: 'gpt-6-luna',
   instructions: 'How complex is this plot?'
 } AS config
 RETURN ai.text.score(
@@ -224,7 +223,7 @@ RETURN ai.text.score(
 | `input`         | `STRING` | The text to evaluate the condition about.
 | `condition`     | `STRING` | The condition to evaluate, as a yes/no question or statement.
 | `provider`      | `STRING` | The identifier of the provider: 'Azure-OpenAI', 'Bedrock', 'OpenAI', 'Typesafe', 'VertexAI'.
-| `configuration` | `MAP`    | Provider specific configuration, use `CALL ai.text.decide.providers()` to find the configuration needed for each provider. You can describe what true and false mean by adding `criteria` with a map of optional `true` and `false` `STRING` descriptions. `criteria` is not supported by the OpenAI and Azure-OpenAI providers, which reject it with an error.
+| `configuration` | `MAP`    | Provider specific configuration, use `CALL ai.text.decide.providers()` to find the configuration needed for each provider. You can describe what true and false mean by adding `criteria` with a map of optional `true` and `false` `STRING` descriptions.
 2+| *Returns*                            | `FLOAT`  | The probability that the condition is true of the input.
 |===
 
@@ -245,7 +244,7 @@ WITH m, ai.text.predicate(
   m.plot,
   'Does the plot involve future technology?',
   'OpenAI',
-  {token: $token, model: $model}
+  {token: $openaiToken, model: 'gpt-6-luna'}
 ) AS probability
 WHERE probability > 0.8
 RETURN m.title AS title, probability
@@ -299,7 +298,7 @@ RETURN ai.text.predicate(
 |    *Description*   3+| Answer a set of predicate, choice and score questions about the input, with probabilities.
 .5+| *Inputs* | *Name*          | *Type*   | *Description*
 | `input`         | `STRING` | The text to answer the questions about.
-| `questions`     | `MAP`    | A map of question name to question, see <<question-types>>.
+| `questions`     | `MAP`    | A map `{<label>: <question>}`. Each question has a `type` ('predicate', 'choice' or 'score') and `instructions`. A 'choice' question also has `choices`, a map `{<choice>: <description>}`. A 'score' question also has `levels`, a list of level labels ordered lowest first. See <<question-types>>.
 | `provider`      | `STRING` | The identifier of the provider: 'Azure-OpenAI', 'Bedrock', 'OpenAI', 'Typesafe', 'VertexAI'.
 | `configuration` | `MAP`    | Provider specific configuration, use `CALL ai.text.decide.providers()` to find the configuration needed for each provider.
 2+| *Returns*                            | `MAP`    | A map of question name to answer, in the order the questions were given.
@@ -363,7 +362,7 @@ WITH m.plot AS plot, {
     levels: ['Low', 'Medium', 'High']
   }
 } AS questions
-RETURN ai.text.decide(plot, questions, 'OpenAI', {token: $token, model: $model}) AS result
+RETURN ai.text.decide(plot, questions, 'OpenAI', {token: $openaiToken, model: 'gpt-6-luna'}) AS result
 ----
 
 [role="queryresult",options="header",cols="1"]
